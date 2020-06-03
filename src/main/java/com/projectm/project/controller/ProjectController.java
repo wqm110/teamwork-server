@@ -2,10 +2,13 @@ package com.projectm.project.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
+import com.framework.common.utils.StringUtils;
 import com.projectm.common.BeanMapUtils;
 import com.projectm.common.CommUtils;
+import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
 import com.projectm.config.MProjectConfig;
 import com.projectm.member.domain.Member;
@@ -32,7 +35,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class ProjectController extends BaseController {
 
     @Autowired
@@ -60,8 +63,20 @@ public class ProjectController extends BaseController {
     private TaskStagesTempleteService taskStagesTempleteService;
     @Autowired
     private MemberAccountService memberAccountService;
+    @Autowired
+    private ProjectMenuService projectMenuService;
 
 
+    /**
+     * 登录系统后，请求的索引
+     * @param
+     * @return
+     */
+    @PostMapping("/index")
+    @ResponseBody
+    public AjaxResult projectIndex(){
+        return AjaxResult.success(projectMenuService.getCurrentUserMenu());
+    }
 
 
     /**
@@ -73,16 +88,11 @@ public class ProjectController extends BaseController {
     @ResponseBody
     public AjaxResult getLogBySelfProject(@RequestParam Map<String,Object> mmap){
         Map loginMember = getLoginMember();
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",20);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-
-
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
+        IPage<Map> ipage = Constant.createPage(mmap);
         Map params = new HashMap();
-        params.put("memberCode",String.valueOf(loginMember.get("memberCode")));
-        params.put("orgCode",String.valueOf(loginMember.get("organizationCode")));
+        params.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
+        params.put("orgCode",MapUtils.getString(loginMember,"organizationCode"));
+        params.put("projectCode",MapUtils.getString(mmap,"projectCode"));
 
         IPage<Map> resultData =  proService.getLogBySelfProject(ipage,params);
 
@@ -91,6 +101,19 @@ public class ProjectController extends BaseController {
         }
         return AjaxResult.success();
 
+    }
+
+    @PostMapping("/file/uploadFiles")
+    @ResponseBody
+    public AjaxResult uploadFiels(HttpServletRequest request, @RequestParam("avatar") MultipartFile multipartFile)  throws Exception{
+        String  fileName= request.getParameter("identifier");
+        String  orgFileName= request.getParameter("filename");
+        String  chunkNumber= request.getParameter("chunkNumber");
+        String  totalChunks= request.getParameter("totalChunks");
+        Map loginMember = getLoginMember();
+        String orgCode = MapUtils.getString(loginMember,"organizationCode");
+        String memberCode = MapUtils.getString(loginMember,"memberCode");
+        return AjaxResult.success();
     }
 
     /**
@@ -178,6 +201,13 @@ public class ProjectController extends BaseController {
     public AjaxResult recycle(@RequestParam Map<String,Object> mmap)  throws Exception
         {
         String projectCode = String.valueOf(mmap.get("projectCode"));
+        Map projectMap = proService.getProjectByCode(projectCode);
+        if(MapUtils.isEmpty(projectMap)){
+            return AjaxResult.warn("文件不存在");
+        }
+        if("1".equals(MapUtils.getString(projectMap,"deleted"))){
+            return AjaxResult.warn("文件已在回收站");
+        }
         int i = proService.updateRecycleByCode(projectCode,1,DateUtil.formatDateTime(new Date()));
         return AjaxResult.success(i);
     }
@@ -263,20 +293,28 @@ public class ProjectController extends BaseController {
     @ResponseBody
     public AjaxResult projectRead(@RequestParam Map<String,Object> mmap)
     {
-        String projectCode = String.valueOf(mmap.get("projectCode"));
+        Map loginMember = getLoginMember();
+        String projectCode = MapUtils.getString(mmap,"projectCode");//String.valueOf(mmap.get("projectCode"));
         Map resultData = new HashMap();
         Map projectMap = proService.getProjectByCode(projectCode);
         resultData.putAll(projectMap);
         Map pm = projectMemberService.getProjectMemberByProjectCode(projectCode);
-        Map pc = projectCollectionService.getProjectCollection(projectCode,String.valueOf(pm.get("member_code")));
-        if(pc!=null && null!=pc.get("member_code")){
+        List<Map> pc = projectCollectionService.getProjectCollection(projectCode,MapUtils.getString(loginMember,"memberCode"));
+
+        if(pc!=null && pc.size()>0 && null!=pc.get(0).get("member_code")){
             resultData.put("collected",1);
         }else{
             resultData.put("collected",0);
         }
-        Member member = memberService.getMemberByCode(String.valueOf(pm.get("member_code")));
-        resultData.put("owner_name",member.getName());
-        resultData.put("owner_avatar",member.getAvatar());
+
+        if(ObjectUtils.isNotEmpty(pm)){
+            Member member = memberService.getMemberByCode(MapUtils.getString(projectMap,"member_code"));
+            if(ObjectUtils.isNotEmpty(member)){
+                resultData.put("owner_name",member.getName());
+                resultData.put("owner_avatar",member.getAvatar());
+            }
+
+        }
         //resultData.put("private",projectMap.get("privated"));
         return AjaxResult.success(resultData);
     }
@@ -291,19 +329,28 @@ public class ProjectController extends BaseController {
     public AjaxResult projectSelfList(@RequestParam Map<String,Object> mmap)
     {
         Map loginMember = getLoginMember();
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",100);
         Integer archive = MapUtils.getInteger(mmap,"archive",-1);
         Integer type =  MapUtils.getInteger(mmap,"type",0);
         Integer delete = MapUtils.getInteger(mmap,"delete",-1);
+        String organizationCode = MapUtils.getString(mmap,"organizationCode","");
+        String memberCode = MapUtils.getString(mmap,"memberCode","");
+
+        Member member = null;
+        if(StringUtils.isNotEmpty(memberCode)){
+            member = memberService.getMemberByCode(memberCode);
+        }else{
+            member = memberService.getMemberByCode(MapUtils.getString(loginMember,"memberCode"));
+        }
+        if(ObjectUtils.isEmpty(member)){
+            return AjaxResult.warn("参数有误");
+        }
 
         Integer deleted = delete == -1?1:delete;
         if(type == 0){
             deleted = 0;
         }
 
-        IPage<Map> iPage = new Page<>();
-        iPage.setCurrent(page);iPage.setSize(pageSize);
+        IPage<Map> iPage = Constant.createPage(mmap);
 
         Map params = new HashMap();
         params.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
@@ -311,15 +358,19 @@ public class ProjectController extends BaseController {
         params.put("deleted",deleted);params.put("archive",archive);
 
 
-        IPage<Map> selPage = proService.getMemberProjects(iPage,params);
+        iPage = proService.getMemberProjects(iPage,params);
 
         List<Map> resultList = new ArrayList<>();
-        List<Map> records = selPage.getRecords();
-        Map pc = null;
+        List<Map> records = iPage.getRecords();
+        List<Map> pc = null;
         if(!CollectionUtils.isEmpty(records)){
             for(Map map:records){
+                map.put("owner_name","-");
+                if(StringUtils.isNotEmpty(MapUtils.getString(map,"project_code"))){
+
+                }
                 pc = projectCollectionService.getProjectCollection(MapUtils.getString(map,"code"),MapUtils.getString(map,"member_code"));
-                if(pc!=null && null!=pc.get("member_code")){
+                if(pc!=null && pc.size()>0 && null!=pc.get(0).get("member_code")){
                     map.put("collected",1);
                 }else{
                     map.put("collected",0);
@@ -327,16 +378,12 @@ public class ProjectController extends BaseController {
                 Map pm = projectMemberService.gettMemberCodeAndNameByProjectCode(MapUtils.getString(map,"code"));
                 if(MapUtils.isNotEmpty(pm)){
                     map.put("owner_name",pm.get("name"));
-                }else{
-                    map.put("owner_name","");
                 }
                 resultList.add(map);
             }
         }
-        Map data = new HashMap();
-        data.put("list",resultList);
-        data.put("total",selPage.getTotal());
-        data.put("page",selPage.getCurrent());
+        iPage.setRecords(resultList);
+        Map data = Constant.createPageResultMap(iPage);
         return new AjaxResult(AjaxResult.Type.SUCCESS, "", data);
     }
 
@@ -375,20 +422,20 @@ public class ProjectController extends BaseController {
      */
     @PostMapping("/project")
     @ResponseBody
-    public AjaxResult getProject(@RequestParam Map<String,Object> mmap)
+    public AjaxResult projectIndex(@RequestParam Map<String,Object> mmap)
     {
         Map loginMember = getLoginMember();
-
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",1000);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
         String archive = MapUtils.getString(mmap,"archive",null);
         String type = MapUtils.getString(mmap,"type",null);
         String recycle = MapUtils.getString(mmap,"recycle",null);
+        String all = MapUtils.getString(mmap,"all",null);
+        mmap.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
+        mmap.put("orgCode",MapUtils.getString(loginMember,"organizationCode"));
 
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
-        Map params = new HashMap();
+
+        IPage<Map> ipage = Constant.createPage(mmap);
+        return proService.projectIndex(ipage,mmap);
+        /*Map params = new HashMap();
         params.put("memberCode",String.valueOf(loginMember.get("memberCode")));
         params.put("orgCode",String.valueOf(loginMember.get("organizationCode")));
         if(null != archive){ params.put("archive",archive); }
@@ -435,44 +482,17 @@ public class ProjectController extends BaseController {
             data.put("page",resultData.getCurrent());
             return new AjaxResult(AjaxResult.Type.SUCCESS, "", data);
         }
-        return AjaxResult.success(resultData);
+        return AjaxResult.success(resultData);*/
     }
 
     @PostMapping("/project_template")
     @ResponseBody
-    public AjaxResult getProjectTemplate(@RequestParam Map<String,Object> mmap)
+    public AjaxResult projectTemplateIndex(@RequestParam Map<String,Object> mmap)
     {
         Map loginMember = getLoginMember();
-        String orgCode = String.valueOf(loginMember.get("organizationCode"));
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",1);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        Integer viewType = MapUtils.getInteger(mmap,"viewType",-1);
-
-
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
-        Map params = new HashMap();
-        params.put("isSystem",viewType);
-        params.put("orgCode",orgCode);
-
-        IPage<Map> pageTemplate = projectTemplateService.getProTemplateByOrgCode(ipage,params);
-        List<Map> listProTemplate = pageTemplate.getRecords();
-        List<Map> resultData = new ArrayList<Map>();
-        for(int i=0;null != listProTemplate && i<listProTemplate.size();i++){
-            Map m = listProTemplate.get(i);
-            List<String> list = proService.getTaskStageTempNameByTemplateCode(MapUtils.getString(m,"code"));
-            m.put("task_stages",list);
-            resultData.add(m);
-        }
-       if(null != page){
-            Map data = new HashMap();
-            data.put("list",resultData);
-            data.put("total",pageTemplate.getTotal());
-            data.put("page",pageTemplate.getCurrent());
-            return new AjaxResult(AjaxResult.Type.SUCCESS, "", data);
-        }
-        return AjaxResult.success(resultData);
+        mmap.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
+        mmap.put("orgCode",MapUtils.getString(loginMember,"organizationCode"));
+        return AjaxResult.success(Constant.createPageResultMap(projectTemplateService.getProjectTemplateIndex(Constant.createPage(mmap),mmap)));
     }
 
     /**
@@ -571,22 +591,21 @@ public class ProjectController extends BaseController {
      * @param mmap
      * @return
      */
-    @PostMapping("/save")
+    @PostMapping("project/save")
     @ResponseBody
     public AjaxResult saveProject(@RequestParam Map<String,Object> mmap)
     {
         Map loginMember = getLoginMember();
-        String orgCode = String.valueOf(loginMember.get("organizationCode"));
         Project project = new Project();
         project.setName(String.valueOf(mmap.get("name")));
         project.setDescription(String.valueOf(mmap.get("description")));
         project.setTemplate_code(String.valueOf(mmap.get("templateCode")));
         project.setAccess_control_type("open");
         project.setCreate_time(DateUtil.formatDateTime(new Date()));
-        project.setOrganization_code(orgCode);
+        project.setOrganization_code(MapUtils.getString(loginMember,"organizationCode"));
         project.setTask_board_theme("simple");
         project.setCode(CommUtils.getUUID());
         //project = proService.saveProject(project);
-        return AjaxResult.success(proService.saveProject(project));
+        return AjaxResult.success(proService.saveProject(project,loginMember));
     }
 }

@@ -8,6 +8,7 @@ import com.projectm.project.domain.ProjectCollection;
 import com.projectm.project.mapper.ProjectCollectionMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,10 +28,10 @@ public class ProjectCollectionService extends ServiceImpl<ProjectCollectionMappe
     }
 
     //根据projectCode和memberCode获取收藏记录
-    public Map getProjectCollection(String projectCode, String memberCode){
+    public List<Map> getProjectCollection(String projectCode, String memberCode){
         LambdaQueryWrapper<ProjectCollection> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ProjectCollection::getMember_code, memberCode);
         queryWrapper.eq(ProjectCollection::getProject_code, projectCode);
-        return baseMapper.getProjectCollection(projectCode,memberCode);
+        return baseMapper.selectProjectCollection(projectCode,memberCode);
     }
 }

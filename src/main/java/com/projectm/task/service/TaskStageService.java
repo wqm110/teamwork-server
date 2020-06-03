@@ -1,5 +1,6 @@
 package com.projectm.task.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -18,8 +19,14 @@ public class TaskStageService  extends ServiceImpl<TaskStageMapper, TaskStage> {
     }
 
     //根据 项目编号查询taskStage
-    public IPage<Map> selectTaskStageByProjectCode(IPage ipage, Map params){
+    public IPage<TaskStage> selectTaskStageByProjectCode(IPage ipage, Map params){
         return baseMapper.selectTaskStageByProjectCodeForPage(ipage,params);
+    }
+
+    public TaskStage getTaskStageByCode(String code){
+        LambdaQueryWrapper<TaskStage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TaskStage::getCode, code);
+        return baseMapper.selectOne(queryWrapper);
     }
 
 }

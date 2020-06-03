@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
@@ -14,7 +15,7 @@ import java.util.Map;
 public interface ProjectCollectionMapper extends BaseMapper<ProjectCollection> {
 
     @Select("SELECT * FROM pear_project_collection A  WHERE A.project_code = #{projectCode} and A.member_code = #{memberCode}")
-    Map getProjectCollection(String projectCode,String memberCode);
+    List<Map> selectProjectCollection(String projectCode, String memberCode);
 }
 
 

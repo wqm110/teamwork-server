@@ -4,13 +4,16 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.framework.common.utils.StringUtils;
 import com.projectm.domain.BaseDomain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.thymeleaf.util.ListUtils;
 
 import java.io.Serializable;
+import java.util.List;
 
 @TableName("pear_project_menu")
 @Data
@@ -32,7 +35,12 @@ public class ProjectMenu  extends BaseDomain implements Serializable {
     private Integer status;
     private Integer create_by;
     private String create_at;
-    private Integer is_inner;
+
+    @TableField("is_inner")
+    private Integer isinner;
+
+    private boolean is_inner;
+
     private String _values;
     @TableField(exist = false)
     private String values;
@@ -44,4 +52,36 @@ public class ProjectMenu  extends BaseDomain implements Serializable {
     private String innerText;
     @TableField(exist = false)
     private String fullUrl;
+
+    @TableField(exist = false)
+    private List<ProjectMenu> children;
+
+    public List<ProjectMenu> getChildren(){
+        if(ListUtils.isEmpty(children)){
+            return null;
+        }
+        return  children;
+    }
+
+    public boolean getIs_inner(){
+        if(isinner == 0) return false;
+        return true;
+    }
+    public String getStatusText(){
+        if(1 == status)return "使用中";
+        else if(0 == status) return "禁用";
+        else return "";
+    }
+    public String getInnerText(){
+        if(1 == isinner)return "内页";
+        else if(0 == isinner) return "导航";
+        else return "";
+    }
+    public String getFullUrl(){
+        //if((null != params && null != values) || !"".equals(values)){
+        if(StringUtils.isNotEmpty(params) && StringUtils.isNotEmpty(values)){
+            return url+"/"+values;
+        }
+        return url;
+    }
 }

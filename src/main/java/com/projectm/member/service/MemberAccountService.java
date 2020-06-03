@@ -2,6 +2,8 @@ package com.projectm.member.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.framework.common.utils.StringUtils;
+import com.projectm.mapper.CommMapper;
 import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.mapper.MemberAccountMapper;
 import com.projectm.project.mapper.ProjectMapper;
@@ -21,6 +23,8 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
 
     @Autowired
     private ProjectMapper projectMapper;
+    @Autowired
+    private CommMapper commMapper;
 
     //根据orgCode获取memberCount
     public List<Map> getMemberCountByOrgCode(String orgCode){
@@ -41,6 +45,46 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
 
     public IPage<Map> getMemberAccountByOrgCodeAndStatus(IPage page, Map params){
         return baseMapper.selectMemberAccountByOrgCodeAndStatus(page,params);
+    }
+
+    //Account.php  public function index()
+    public IPage<Map> getAccountIndex(IPage<Map> page,Map params) {
+        String memberCode = MapUtils.getString(params, "memberCode");
+        String departmentCode = MapUtils.getString(params, "departmentCode");
+        String account = MapUtils.getString(params, "account");
+        String mobile = MapUtils.getString(params, "mobile");
+        String email = MapUtils.getString(params, "email");
+        String keyword = MapUtils.getString(params, "keyword");
+        String orgCode = MapUtils.getString(params, "orgCode");
+        Integer searchType = MapUtils.getInteger(params, "searchType", -1);
+        String sql = " select * from pear_member_account a where 1=1 ";
+        if(StringUtils.isNotEmpty(keyword)){
+            sql += " and a.name like '%"+keyword+"%' ";
+        }
+        if(1==searchType){
+            sql += " and a.status = 1";
+        }else if(2==searchType){
+            sql+= " and a.department_code = '' ";
+        }else if(3==searchType){
+            sql += " and a.status=0 ";
+        }else if(4==searchType){
+            sql += "  and a.status=1 ";
+            sql += " and a.department_code like '%"+memberCode+"%' ";
+        }else{
+            sql += "  and a.status=1 ";
+        }
+        if(StringUtils.isNotEmpty(account)){
+            sql += " and a.account like '%"+account+"% ";
+        }
+        if(StringUtils.isNotEmpty(mobile)){
+            sql += " and a.mobile like '%"+mobile+"% ";
+        }
+        if(StringUtils.isNotEmpty(email)){
+            sql += " and a.email like '%"+email+"% ";
+        }
+        sql += " order by id asc";
+
+        return commMapper.customQueryItem(page,sql);
     }
 
     public Map getMemberAccountByCode(String code){

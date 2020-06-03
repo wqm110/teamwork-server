@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
@@ -15,6 +16,17 @@ public interface MemberMapper extends BaseMapper<Member> {
 
     @Select("SELECT * FROM pear_member WHERE code = #{memberCode}")
     Map selectMemberByCode(String memberCode);
+
+    @Select("SELECT * FROM pear_member WHERE account = #{account}")
+    Member selectMemberByAccount(String account);
+
+    @Select("select b.organization_code,a.dingtalk_openid,a.code,a.last_login_time,a.city,a.description,a.password,a.province,a.id,a.dingtalk_userid, " +
+            "b.department,b.authorize,a.email,a.area,a.address,a.create_time,a.dingtalk_unionid,b.is_owner,a.sex,a.mobile,a.avatar,a.realname,b.id as account_id,a.idcard,a.name,b.position,a.account,a.status " +
+            "from pear_member a,pear_member_account b " +
+            "where a.code = b.member_code and a.account=#{account} limit 1")
+    Map selectMemberAndAccountByAccount(String account);
+
+
 }
 
 

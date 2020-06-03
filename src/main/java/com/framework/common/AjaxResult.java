@@ -1,4 +1,4 @@
-package com.projectm.common;
+package com.framework.common;
 
 import java.util.HashMap;
 import  com.framework.common.utils.StringUtils;
@@ -18,6 +18,7 @@ public class AjaxResult extends HashMap<String, Object>
      */
     public enum Type
     {
+
         /** 成功 */
         SUCCESS(200),
         /** 警告 */

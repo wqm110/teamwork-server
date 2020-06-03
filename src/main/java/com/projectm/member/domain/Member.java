@@ -8,6 +8,7 @@ import com.projectm.domain.BaseDomain;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @TableName("pear_member")
 @Data
@@ -49,5 +50,7 @@ public class Member  extends BaseDomain implements Serializable {
     private String position;
     @TableField(exist = false)
     private String department;
+    @TableField(exist = false)
+    private List<String> nodes;
 
 }

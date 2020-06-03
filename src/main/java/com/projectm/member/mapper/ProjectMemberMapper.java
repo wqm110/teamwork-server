@@ -33,6 +33,9 @@ public interface ProjectMemberMapper  extends BaseMapper<ProjectMember> {
     @Select("SELECT member_code, name FROM pear_project_member pm LEFT JOIN pear_member m ON pm.member_code = m.code WHERE pm.project_code = #{projectCode} AND is_owner = 1 LIMIT 1")
     Map selectMemberCodeAndNameByProjectCode(String projectCode);
 
+    @Select("select b.name from pear_project_member a,pear_member b where a.member_code = b.code and a.project_code=#{projectCode} and b.code=#{memberCode} and a.is_owner = 1 limit 1")
+    String selectMemberNameByProjectMember(String projectCode,String memberCode);
+
 
 }
 

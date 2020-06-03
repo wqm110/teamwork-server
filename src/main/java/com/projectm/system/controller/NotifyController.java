@@ -2,7 +2,7 @@ package com.projectm.system.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
 import com.projectm.system.service.NotifyService;
 import com.projectm.web.BaseController;
 import org.apache.commons.collections.MapUtils;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class NotifyController   extends BaseController {
     @Autowired
     private NotifyService notifyService;

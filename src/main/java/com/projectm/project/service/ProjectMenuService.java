@@ -1,48 +1,39 @@
 package com.projectm.project.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.framework.common.utils.ServletUtils;
+import com.projectm.common.Constant;
+import com.projectm.common.MenuUtils;
 import com.projectm.project.domain.ProjectMenu;
 import com.projectm.project.mapper.ProjectMenuMapper;
-import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Service
 public class ProjectMenuService extends ServiceImpl<ProjectMenuMapper, ProjectMenu> {
 
-    public List<Map> getAllProjectMenuTree(){
-        List<Map> pMenuList = baseMapper.selectAllProjectMenu();
-        List<Map> menusBase = baseMapper.selectProjectMenuByPid(0);
-        List<Map> menuLNotBase = baseMapper.selectAllNotBase();
-        for (Map menu : menusBase) {
-            List<Map> menus = iterateMenus(menuLNotBase, MapUtils.getInteger(menu,"id"));
-            menu.put("children",menus);
-        }
-        return menusBase;
+    public List<ProjectMenu> getCurrentUserMenu(){
+        Map member = (Map)ServletUtils.getRequest().getSession().getAttribute(Constant.CURRENT_USER);
+        List nodes = (List)member.get(Constant.NODES);
+        List<ProjectMenu> lstMenu = baseMapper.selectAllProjectMenu(new HashMap(){{put("status",1);}});
+        MenuUtils mu = new MenuUtils(lstMenu);
+        return mu.builTree();
+    }
+    public List<ProjectMenu> getAllProjectMenuTree(){
+        List<ProjectMenu> listMenu = baseMapper.selectAllProjectMenu(new HashMap());
+        MenuUtils mu = new MenuUtils(listMenu);
+        return mu.builTree();
     }
 
-    protected List<Map> iterateMenus(List<Map> menuVoList,Integer pid){
-        List<Map> result = new ArrayList<Map>();
-        for (Map menu : menuVoList) {
-            //获取菜单的id
-            Integer menuid = MapUtils.getInteger(menu,"id");
-            //获取菜单的父id
-            Integer parentid = MapUtils.getInteger(menu,"pid",-1);
-            if(-1 != parentid){
-                if(parentid.equals(pid)){
-                    //递归查询当前子菜单的子菜单
-                    List<Map> iterateMenu = iterateMenus(menuVoList,menuid);
-                    menu.put("children",iterateMenu);
-                    result.add(menu);
-                }
-            }
-        }
-        return result;
+    public List<ProjectMenu> getProjectMenuByStatus(String status){
+        List<ProjectMenu> listMenu = baseMapper.selectAllProjectMenu(new HashMap(){{put("status",status);}});
+        MenuUtils mu = new MenuUtils(listMenu);
+        return mu.builTree();
     }
-
     /**
      * 获取子目录的ID，并删除（问题）
      * @param id
@@ -52,24 +43,13 @@ public class ProjectMenuService extends ServiceImpl<ProjectMenuMapper, ProjectMe
     public Integer menuDelete(Integer id){
         List<Integer> ids = new ArrayList<>();
         ids.add(id);
-        List<Map> childMenu = baseMapper.selectProjectMenuByPid(id);
-
-        List<Map> pMenuList = baseMapper.selectAllProjectMenu();
-        for(Map m:childMenu){
-            ids.add(MapUtils.getInteger(m,"id"));
-            ids.addAll(getChildIds(pMenuList,MapUtils.getInteger(m,"id")));
+        List<ProjectMenu> childMenu = baseMapper.selectProjectMenuByPid(new HashMap(){{put("pid",id);}});
+        List<ProjectMenu> pMenuList = baseMapper.selectAllProjectMenu(new HashMap());
+        for(ProjectMenu m:childMenu){
+            ids.add(m.getId());
+            ids.addAll(MenuUtils.getMenuIds(pMenuList,m));
         }
         return baseMapper.deleteBatchIds(ids);
-
     }
 
-    protected  List<Integer> getChildIds(List<Map> menu,Integer pid){
-        List<Integer> result = new ArrayList<>();
-        for(Map m:menu){
-            if(pid == MapUtils.getInteger(m,"pid")){
-                result.add(MapUtils.getInteger(m,"id"));
-            }
-        }
-        return result;
-    }
 }

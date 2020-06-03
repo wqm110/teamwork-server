@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.utils.StringUtils;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
 import com.projectm.common.CommUtils;
 import com.projectm.common.DateUtil;
 import com.projectm.project.domain.ProjectAuth;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class AuthorityControoler extends BaseController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class AuthorityControoler extends BaseController {
 
         String action = MapUtils.getString(mmap,"action");
         Integer id = MapUtils.getInteger(mmap,"id",-1);
-        if("apply".equals(action)){
+        if("save".equals(action)){
             String nodesStr = MapUtils.getString(mmap,"nodes","[]");
             JSONArray jsonArray = JSON.parseArray(nodesStr);
             List<ProjectAuthNode> nodes = new ArrayList<ProjectAuthNode>();
@@ -327,12 +327,12 @@ public class AuthorityControoler extends BaseController {
         pm.setNode(node);pm.setSort(sort);pm.setParams(params);
         pm.set_values(values);pm.setIcon(icon);pm.setStatus(status);
         pm.setPid(pid);pm.setShow_slider("true".equalsIgnoreCase(show_slider)?1:0);
-        pm.setIs_inner("true".equalsIgnoreCase(is_inner)?1:0);
+        pm.setIsinner("true".equalsIgnoreCase(is_inner)?1:0);
         pm.setCreate_at(DateUtil.formatDateTime(new Date()));
         pm.setCreate_by(0);
         projectMenuService.save(pm);
 
-        if(pm.getIs_inner() == 0){pm.setInnerText("导航");}else if(pm.getIs_inner() == 1){ pm.setInnerText("内页");}
+        if(pm.getIsinner() == 0){pm.setInnerText("导航");}else if(pm.getIsinner() == 1){ pm.setInnerText("内页");}
         if(pm.getStatus() == 0){pm.setStatusText("禁用");}else if(pm.getStatus() == 1){ pm.setStatusText("使用中");}
         if((null != pm.getParams() && null != pm.get_values()) || !"".equals(pm.get_values())){
             pm.setFullUrl(pm.getUrl()+"/"+pm.get_values());

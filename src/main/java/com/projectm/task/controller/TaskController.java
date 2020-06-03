@@ -3,30 +3,31 @@ package com.projectm.task.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.utils.StringUtils;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
 import com.projectm.common.CommUtils;
+import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
+import com.projectm.member.domain.Member;
 import com.projectm.member.service.MemberAccountService;
 import com.projectm.member.service.MemberService;
+import com.projectm.project.domain.Project;
 import com.projectm.project.domain.ProjectLog;
 import com.projectm.project.service.ProjectLogService;
 import com.projectm.project.service.ProjectService;
 import com.projectm.project.service.SourceLinkService;
-import com.projectm.task.domain.Task;
-import com.projectm.task.domain.TaskTag;
-import com.projectm.task.domain.TaskToTag;
-import com.projectm.task.domain.TaskWorkTime;
+import com.projectm.task.domain.*;
 import com.projectm.task.service.*;
 import com.projectm.web.BaseController;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class TaskController  extends BaseController {
 
     @Autowired
@@ -77,19 +78,22 @@ public class TaskController  extends BaseController {
     @ResponseBody
     public AjaxResult taskSelfList(@RequestParam Map<String,Object> mmap)  throws Exception {
         Map loginMember = getLoginMember();
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",20);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
         Integer type = MapUtils.getInteger(mmap,"type",0);
-        String memberCode = MapUtils.getString(mmap,"memberCode",MapUtils.getString(loginMember,"memberCode"));
+
+        Integer done = type;
+        if(type == 0) done = 0;
+        if(type ==-1) done = type;
+
+        String memberCode = MapUtils.getString(mmap,"memberCode",MapUtils.getString(loginMember,"code"));
+        Integer finalDone = done;
         Map params = new HashMap(){{
             put("memberCode",memberCode);
-            put("done",0);
+            put("done", finalDone);
         }};
-        IPage<Map> iPage = new Page<>();
-        iPage.setSize(pageSize);iPage.setCurrent(page);
-        iPage = taskService.getTaskSelfList(iPage,params,type);
-        if(iPage != null){
-            List<Map> list = iPage.getRecords();
+        IPage<Map> page = Constant.createPage(mmap);
+        page = taskService.getMemberTasks(page,params);
+        if(page != null){
+            List<Map> list = page.getRecords();
             List<Map> resultList = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(list)){
                 Map memberMap,projectMap = null;
@@ -101,10 +105,8 @@ public class TaskController  extends BaseController {
                     resultList.add(m);
                 }
             }
-            Map data = new HashMap();
+            Map data= Constant.createPageResultMap(page);
             data.put("list",resultList);
-            data.put("total",iPage.getTotal());
-            data.put("page",iPage.getCurrent());
             return AjaxResult.success(data);
         }
         return AjaxResult.success(new ArrayList<>());
@@ -174,7 +176,7 @@ public class TaskController  extends BaseController {
         Integer pri = MapUtils.getInteger(mmap,"pri",-1);
 
         Task task = new Task();
-        Map taskMap = taskService.getTaskByCode(taskCode);
+        Map taskMap = taskService.getTaskMapByCode(taskCode);
         ProjectLog projectLog = new ProjectLog();
         if(MapUtils.isNotEmpty(taskMap)){
             task.setId(MapUtils.getInteger(taskMap,"id"));
@@ -234,7 +236,7 @@ public class TaskController  extends BaseController {
         String comment = MapUtils.getString(mmap, "comment");
         Object mention = MapUtils.getObject(mmap,"mentions");
 
-        Map taskCodeMap = taskService.getTaskByCode(taskCode);
+        Map taskCodeMap = taskService.getTaskMapByCode(taskCode);
 
         ProjectLog projectLog = new ProjectLog();
         /*projectLog.setMember_code(MapUtils.getString(loginMember,"memberCode"));
@@ -269,6 +271,17 @@ public class TaskController  extends BaseController {
         String code = MapUtils.getString(mmap, "code");
         return AjaxResult.success(taskWorkTimeService.delTaskWorkTimeByCode(code));
     }
+
+
+    @PostMapping("/task/getListByTaskTag")
+    @ResponseBody
+    public AjaxResult getListByTaskTag(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String taskTagCode = MapUtils.getString(mmap, "taskTagCode");
+        IPage<Map> page = Constant.createPage(mmap);
+        page = taskTagService.selectListByTaskTag(page,taskTagCode);
+        return AjaxResult.success(Constant.createPageResultMap(page));
+    }
+
 
     /**
      * 项目管理	我的项目 项目打开 任务清单 打开任务详情 编辑工时
@@ -332,12 +345,38 @@ public class TaskController  extends BaseController {
         String pcode = MapUtils.getString(mmap, "pcode");
         String name = MapUtils.getString(mmap, "name");
         String assign_to = MapUtils.getString(mmap, "assign_to");
+        String stage_code = MapUtils.getString(mmap,"stage_code");
+        String project_code = MapUtils.getString(mmap,"project_code");
+        Map loginMember = getLoginMember();
 
+        if(StringUtils.isEmpty(name)){
+            return AjaxResult.warn("请填写任务标题");
+        }
         Task  task = new Task();
-
-        return null;
-
-
+        task.setStage_code(stage_code);
+        task.setProject_code(project_code);
+        if(StringUtils.isNotEmpty(pcode)){
+            Map parentTask = taskService.getTaskMapByCode(pcode);
+            if(MapUtils.isEmpty(parentTask)){
+                return AjaxResult.warn("父目录无效");
+            }
+            if(MapUtils.getInteger(parentTask,"deleted",-1) == 1){
+                return AjaxResult.warn("父任务在回收站中无法编辑");
+            }
+            if(MapUtils.getInteger(parentTask,"done",-1) == 1){
+                return AjaxResult.warn("父任务已完成，无法添加新的子任务");
+            }
+            task.setProject_code(MapUtils.getString(parentTask,"project_code"));
+            task.setStage_code(MapUtils.getString(parentTask,"stage_code"));
+            task.setPcode(pcode);
+        }
+        task.setAssign_to(assign_to);
+        task.setCreate_by(MapUtils.getString(loginMember,"memberCode"));
+        task.setDescription("");
+        task.setBegin_time("");
+        task.setEnd_time("");
+        task.setName(name);
+        return taskService.createTask(task,pcode);
     }
 
     /**
@@ -504,6 +543,26 @@ public class TaskController  extends BaseController {
         return new AjaxResult(AjaxResult.Type.SUCCESS, "", recordResult);
     }
 
+    @PostMapping("/task/read")
+    @ResponseBody
+    public AjaxResult taskRead(@RequestParam Map<String,Object> mmap)  throws Exception
+    {
+        Map loginMember = getLoginMember();
+        String memberCode = MapUtils.getString(loginMember,"memberCode");
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        return AjaxResult.success(taskService.readTask(taskCode,memberCode));
+    }
+    @PostMapping("/task")
+    @ResponseBody
+    public AjaxResult taskIndex(@RequestParam Map<String,Object> mmap)  throws Exception
+    {
+        Map loginMember = getLoginMember();
+        IPage<Map> page = Constant.createPage(mmap);
+        mmap.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
+        page = taskService.taskIndex(page,mmap);
+        return AjaxResult.success(Constant.createPageResultMap(page));
+    }
+
     /**
      * 项目管理	我的项目 项目打开 任务清单 打开任务详情
      * @param mmap
@@ -574,7 +633,8 @@ public class TaskController  extends BaseController {
                 executor.put("name",MapUtils.getString(memberMap,"name"));
                 executor.put("avatar",MapUtils.getString(memberMap,"avatar"));
                 map.put("executor",executor);
-                List<Map> taskToTagLists = taskService.selectTaskToTagByTaskCode(MapUtils.getString(map,"code"));
+                map = taskService.buildTaskMap(map,MapUtils.getString(loginMember,"memberCode"));
+                /*List<Map> taskToTagLists = taskService.selectTaskToTagByTaskCode(MapUtils.getString(map,"code"));
                 if(!CollectionUtils.isEmpty(taskToTagLists)){
                     tags = new ArrayList<>();
                     Map tag = null;
@@ -608,12 +668,11 @@ public class TaskController  extends BaseController {
                 if(!MapUtils.isEmpty(childCount1)){
                     childCount.put(1,childCount1.get("tp_count"));
                 }
-                map.put("childCount",childCount);
+                map.put("childCount",childCount);*/
                 resultList.add(map);
             }
         }
         return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultList);
-
     }
 
     /**
@@ -626,25 +685,18 @@ public class TaskController  extends BaseController {
     public AjaxResult taskStages(@RequestParam Map<String,Object> mmap)  throws Exception
     {
         String projectCode = MapUtils.getString(mmap,"projectCode");
-        Map loginMember = getLoginMember();
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",1000);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
+        if(null == projectCode){
+            return AjaxResult.warn("请选择一个项目");
+        }
+        IPage<TaskStage> ipage = Constant.createPage(mmap);
         Map params = new HashMap();
         params.put("projectCode",projectCode);
+        ipage = taskStageService.selectTaskStageByProjectCode(ipage,params);
 
-
-        IPage<Map> pageResult = taskStageService.selectTaskStageByProjectCode(ipage,params);
-
-        if(null == pageResult){
-            pageResult = new Page<>();
+        if(null == ipage){
+            ipage = new Page<>();
         }
-        Map data = new HashMap();
-        data.put("list",pageResult.getRecords());
-        data.put("total",pageResult.getTotal());
-        data.put("page",pageResult.getCurrent());
+        Map data = Constant.createPageResultMap(ipage);
         return new AjaxResult(AjaxResult.Type.SUCCESS, "", data);
 
     }

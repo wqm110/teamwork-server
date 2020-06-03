@@ -120,6 +120,10 @@ public class DateUtil {
 		return new SimpleDateFormat(PATTERN_DATETIME).format(date);
 	}
 
+	public static final String getCurrentDateTime(){
+		return formatDateTime(new Date());
+	}
+
 	public static final String formatDate(Date date) {
 		return new SimpleDateFormat(PATTERN_DATE).format(date);
 	}

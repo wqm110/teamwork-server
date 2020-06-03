@@ -2,10 +2,13 @@ package com.projectm.org.controller;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
+import com.framework.common.utils.ServletUtils;
+import com.framework.common.utils.StringUtils;
 import com.projectm.common.CommUtils;
+import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
+import com.projectm.member.service.MemberService;
 import com.projectm.org.domain.Department;
 import com.projectm.org.domain.Organization;
 import com.projectm.org.service.DepartmentService;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class OrgController   extends BaseController {
 
     @Autowired
@@ -31,6 +34,9 @@ public class OrgController   extends BaseController {
 
     @Autowired
     private DepartmentService departmentService;
+
+    @Autowired
+    private MemberService memberService;
 
     /**
      * 新增保存部门
@@ -46,11 +52,16 @@ public class OrgController   extends BaseController {
         String departmentCode = MapUtils.getString(mmap,"departmentCode");
         String parentDepartmentCode = MapUtils.getString(mmap,"parentDepartmentCode");
         String name = MapUtils.getString(mmap,"name");
-
-        Department dep = new Department();
-        dep.setCode(CommUtils.getUUID());dep.setCreate_time(DateUtil.formatDateTime(new Date()));
-        dep.setName(name);dep.setOrganization_code(organizationCode);dep.setPcode(parentDepartmentCode);
-        return AjaxResult.success(departmentService.save(dep));
+        if(StringUtils.isEmpty(name)){
+            return AjaxResult.warn("请填写部门名称");
+        }
+        Department dep = Department.builder().code(CommUtils.getUUID()).create_time(DateUtil.formatDateTime(new Date()))
+                .name(name).organization_code(organizationCode).pcode(parentDepartmentCode).build();
+        boolean result = departmentService.save(dep);
+        if(result){
+            return AjaxResult.success(dep);
+        }
+        return AjaxResult.warn("操作失败，请稍候再试！");
 
     }
 
@@ -62,19 +73,8 @@ public class OrgController   extends BaseController {
         Map loginMember = getLoginMember();
         String organizationCode = MapUtils.getString(loginMember,"organizationCode");
         String pCode = MapUtils.getString(mmap,"pcode","");
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",10);
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
-        IPage<Map> deptData = departmentService.getDepartmentByOrgCodeAndPCode(ipage,organizationCode,pCode);
-
-        Map resultData = new HashMap();
-        resultData.put("list",deptData.getRecords());
-        resultData.put("total",deptData.getTotal());
-        resultData.put("page",deptData.getCurrent());
-        return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultData);
-
+        IPage<Map> ipage = departmentService.getDepartmentByOrgCodeAndPCode(Constant.createPage(mmap),organizationCode,pCode);
+        return AjaxResult.success(Constant.createPageResultMap(ipage));
     }
 
     @PostMapping("/department/read")
@@ -118,8 +118,8 @@ public class OrgController   extends BaseController {
     @ResponseBody
     public AjaxResult getOrgList()
     {
-        List<Map> resultData = orgService._getOrgList(null);
-        return AjaxResult.success(resultData);
+        Map memberMap = (Map)ServletUtils.getRequest().getSession().getAttribute(Constant.CURRENT_USER);
+        return AjaxResult.success(memberService.getOrgList(MapUtils.getString(memberMap,"code")));
     }
 
     /**
@@ -133,18 +133,10 @@ public class OrgController   extends BaseController {
     {
         Map loginMember = getLoginMember();
         String memberCode = MapUtils.getString(loginMember,"memberCode");
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",10);
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
+        IPage<Map> ipage = Constant.createPage(mmap);
         IPage<Map> orgData = organizationService.getAllOrganizationByMemberCode(ipage,memberCode);
 
-        Map resultData = new HashMap();
-        resultData.put("list",orgData.getRecords());
-        resultData.put("total",orgData.getTotal());
-        resultData.put("page",orgData.getCurrent());
-        return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultData);
+        return new AjaxResult(AjaxResult.Type.SUCCESS, "", Constant.createPageResultMap(orgData));
     }
 
     /**

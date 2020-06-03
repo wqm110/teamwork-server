@@ -4,15 +4,13 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.projectm.domain.BaseDomain;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
 @TableName("pear_task_stages_template")
 @Data
+@Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

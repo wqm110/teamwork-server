@@ -25,7 +25,7 @@ server:
   port: 8888
   servlet:
     # 应用的访问路径
-    context-path: /
+    context-path: /api/
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -150,3 +150,10 @@ xss:
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
 
+# JWT
+jwt:
+  header: Authorization
+  secret: mySecret
+  #token有效期一天
+  expiration: 86400
+  tokenHead: "Bearer "

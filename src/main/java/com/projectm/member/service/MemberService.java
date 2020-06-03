@@ -1,13 +1,18 @@
 package com.projectm.member.service;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.projectm.member.domain.Member;
 import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.mapper.MemberAccountMapper;
 import com.projectm.member.mapper.MemberMapper;
 import com.projectm.member.mapper.ProjectMemberMapper;
+import com.projectm.org.domain.Organization;
+import com.projectm.org.mapper.OrganizationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +28,9 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
 
     @Autowired
     private MemberAccountMapper memberAccountMapper;
+
+    @Autowired
+    OrganizationMapper organizationMapper;
 
     public List<Map> selectMemberByLoginParam(Map params) {
         return projectMemberMapper.selectMemberByLoginParam(params);
@@ -47,6 +55,16 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
         return baseMapper.selectOne(queryWrapper);
     }
 
+    public  void inviteMemberBatch(String memberCodes,String taskCode){
+        boolean isAll = false;
+        JSONArray memberCodeArray = JSON.parseArray(memberCodes);
+        //List<>
+
+        if(memberCodes.indexOf("all") != -1){
+
+        }
+    }
+
     //根据memberCode获取member信息
     public Map getMemberMapByCode(String memberCode){
         return baseMapper.selectMemberByCode(memberCode);
@@ -58,4 +76,16 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
         Integer i2 = memberAccountMapper.updateById(ma);
         return i1+i2;
     }
+
+    public Member getMemberByName(String account){
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("account", account);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    public List<Organization> getOrgList(String memberCode){
+        return organizationMapper.selectOrganizationByMemberCode(memberCode);
+    }
+
+
 }

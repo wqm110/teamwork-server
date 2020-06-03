@@ -1,13 +1,19 @@
 package com.projectm.web;
 
-import com.projectm.common.AjaxResult;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.framework.common.AjaxResult;
+import com.framework.common.utils.ServletUtils;
+import com.projectm.common.Constant;
 import com.projectm.common.DateUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BaseController {
@@ -89,11 +95,11 @@ public class BaseController {
 
 
     public Map getLoginMember(){
-        Map member = new HashMap();
-        member.put("memberCode","6v7be19pwman2fird04gqu53");
-        member.put("organizationCode","6v7be19pwman2fird04gqu53");
-        member.put("departmentCode","6v7be19pwman2fird04gqu53");
-        member.put("memberCountCode","6v7be19pwman2fird04gqu11");
+        Map member = (Map) ServletUtils.getRequest().getSession().getAttribute(Constant.CURRENT_USER);
+        member.put("memberCode",MapUtils.getString(member,"code"));
+        member.put("organizationCode",ServletUtils.getHeaderParam("organizationCode"));
+        //member.put("departmentCode","6v7be19pwman2fird04gqu53");
+        //member.put("memberCountCode","6v7be19pwman2fird04gqu11");
         return member;
     }
 }

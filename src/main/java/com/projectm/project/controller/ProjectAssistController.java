@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.utils.StringUtils;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
 import com.projectm.common.CommUtils;
 import com.projectm.common.DateUtil;
 import com.projectm.member.service.MemberService;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class ProjectAssistController  extends BaseController {
     @Autowired
     private FileService fileService;
@@ -123,7 +123,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_features")
+    @PostMapping("/project_features")
     @ResponseBody
     public AjaxResult projectProjectFeatures(@RequestParam Map<String,Object> mmap){
         String projectCode = MapUtils.getString(mmap,"projectCode");
@@ -294,7 +294,7 @@ public class ProjectAssistController  extends BaseController {
                 Task task = null;ProjectVersion pv = null;
                 for (Object obj : jsonArray) {
 
-                    Map taskMap = taskService.getTaskByCode(String.valueOf(obj));
+                    Map taskMap = taskService.getTaskMapByCode(String.valueOf(obj));
                     if(MapUtils.isEmpty(taskMap)){
                         return AjaxResult.warn("该任务已被失效");
                     }
@@ -461,7 +461,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_info")
+    @PostMapping("/project_info")
     @ResponseBody
     public AjaxResult projectProjectInfo(@RequestParam Map<String,Object> mmap){
         String projectCode = MapUtils.getString(mmap,"projectCode");

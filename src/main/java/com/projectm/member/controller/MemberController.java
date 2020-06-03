@@ -1,8 +1,10 @@
 package com.projectm.member.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.projectm.common.AjaxResult;
+import com.framework.common.AjaxResult;
+import com.projectm.common.Constant;
 import com.projectm.member.domain.Member;
 import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.domain.ProjectMember;
@@ -11,10 +13,14 @@ import com.projectm.member.service.MemberService;
 import com.projectm.member.service.ProjectMemberService;
 import com.projectm.org.service.DepartmentService;
 import com.projectm.project.service.ProjectAuthService;
+import com.projectm.task.domain.Task;
+import com.projectm.task.service.TaskService;
 import com.projectm.web.BaseController;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/project")
+@RequestMapping("/project")
 public class MemberController  extends BaseController {
     @Autowired
     private ProjectMemberService projectMemberService;
@@ -61,6 +67,26 @@ public class MemberController  extends BaseController {
         memberAccount.setId(MapUtils.getInteger(memberAccountMap,"id"));
         memberAccount.setAvatar(avatar);
         return AjaxResult.success("基本信息更新成功",memberService.updateMemberAccountAndMember(memberAccount,member));
+    }
+
+    @Autowired
+    TaskService taskService;
+
+    @PostMapping("/task_member/inviteMemberBatch")
+    @ResponseBody
+    public AjaxResult taskMemberInviteMemberBatch(@RequestParam Map<String,Object> mmap) {
+        String memberCodes = MapUtils.getString(mmap,"memberCodes");
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        if(StringUtils.isEmpty(memberCodes) || StringUtils.isEmpty(taskCode)){
+            return AjaxResult.warn("数据异常！");
+        }
+        Map loginMember = getLoginMember();
+        Task task = taskService.getTaskByCode(taskCode);
+        if(ObjectUtils.isEmpty(task)){
+            return AjaxResult.warn("该任务已失效！");
+        }
+        memberService.inviteMemberBatch("","");
+        return AjaxResult.success();
     }
 
     /**
@@ -213,19 +239,15 @@ public class MemberController  extends BaseController {
      */
     @PostMapping("/account")
     @ResponseBody
-    public AjaxResult getAccount(@RequestParam Map<String,Object> mmap) {
+    public AjaxResult accountIndex(@RequestParam Map<String,Object> mmap) {
 
         String departmentCode = MapUtils.getString(mmap, "departmentCode");
         Map loginMember = getLoginMember();
         String orgCode = MapUtils.getString(loginMember,"organizationCode");
-        Integer page = MapUtils.getInteger(mmap, "page",1);
-        Integer pageSize = MapUtils.getInteger(mmap, "pageSize",20);
         Integer searchType = MapUtils.getInteger(mmap, "searchType",-1);
-        IPage<Map> ipage = new Page();
-        IPage<Map> resultPage = null;
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
-        Map params = new HashMap();
+        IPage<Map> ipage = Constant.createPage(mmap);
+        ipage = memberAccountService.getAccountIndex(ipage,mmap);
+        /*Map params = new HashMap();
         Map resultData = new HashMap();
         params.put("orgCode",orgCode);
         switch (searchType){
@@ -248,27 +270,23 @@ public class MemberController  extends BaseController {
                 params.put("status",1);
                 params.put("depCode",departmentCode);
                 resultPage =  memberAccountService.getMemberAccountByOrgCodeStatusDeptCode(ipage,params);
-                /*resultData.put("list",resultPage.getRecords());
-                resultData.put("total",resultPage.getTotal());
-                resultData.put("page",resultPage.getCurrent());
-                resultData.put("authList",projectAuthService.getProjectAuthByStatusAndOrgCode("1",orgCode));*/
                 break;
             }
             default:{
                 params.put("status",1);
                 resultPage =  memberAccountService.getMemberAccountByOrgCodeAndStatus(ipage,params);
             }
-        }
+        }*/
 
-        List<Map> records = resultPage.getRecords();
+        List<Map> records = ipage.getRecords();
         List<Map> resultList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(records)){
             String depCodes,authorize = null;
             String[] depCodeArr ,authorizeArr= null;
             Map depMap = null;
             for(Map map:records){
-                depCodes = MapUtils.getString(map,"department_code");
-                authorize = MapUtils.getString(map,"authorize");
+                depCodes = MapUtils.getString(map,"department_code","");
+                authorize = MapUtils.getString(map,"authorize","");
 
                 map.put("membar_account_code",MapUtils.getString(map,"code"));
                 depCodeArr = depCodes.split(",");
@@ -302,9 +320,8 @@ public class MemberController  extends BaseController {
                 resultList.add(map);
             }
         }
-        resultData.put("list",resultList);
-        resultData.put("total",resultPage.getTotal());
-        resultData.put("page",resultPage.getCurrent());
+        ipage.setRecords(resultList);
+        Map resultData = Constant.createPageResultMap(ipage);
         List<Map> listProjectAuth = projectAuthService.getProjectAuthByStatusAndOrgCode("1",orgCode);
         List<Map> authList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(listProjectAuth)){
@@ -401,7 +418,6 @@ public class MemberController  extends BaseController {
         ProjectMember pm = new ProjectMember();
         pm.setCurrent(page);pm.setSize(pageSize);pm.setProject_code(projectCode);
 
-        Map resultData = new HashMap();
         IPage<Map> idata = projectMemberService.getProjectMemberByProjectCode(pm);
         if(null != idata){
             List<Map> list = idata.getRecords();
@@ -418,11 +434,8 @@ public class MemberController  extends BaseController {
                     lrt.add(map);
                 }
             }
-            resultData.put("list",lrt);
-            resultData.put("total",idata.getTotal());
-            resultData.put("page",idata.getCurrent());
-            return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultData);
+            return AjaxResult.success(Constant.createPageResultMap(lrt,idata.getTotal(),idata.getCurrent()));
         }
-        return AjaxResult.success(resultData);
+        return AjaxResult.success(new HashMap<>());
     }
 }
