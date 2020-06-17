@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Data
 @ToString
 @AllArgsConstructor
+@Builder
 public class ProjectVersionLog   extends BaseDomain implements Serializable {
 
     public ProjectVersionLog(){

@@ -1,13 +1,11 @@
 package com.projectm.task.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.projectm.domain.BaseDomain;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -16,6 +14,7 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class File extends BaseDomain implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer id;
@@ -23,7 +22,8 @@ public class File extends BaseDomain implements Serializable {
     private String path_name;
     private String title;
     private String extension;
-    private Integer size;
+    @TableField("size")
+    private Long fsize;
     private String object_type;
     private String organization_code;
     private String task_code;

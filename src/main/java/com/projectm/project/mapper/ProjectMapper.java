@@ -54,7 +54,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     Integer delProjectMember(Map params);
 
-    //@Select("SELECT tl.remark AS remark, tl.content AS content, tl.is_comment AS is_comment, tl.create_time AS create_time,  p. NAME AS project_name, t. NAME AS task_name, t. CODE AS source_code, p. CODE AS project_code, m.avatar AS member_avatar,  m. NAME AS member_name FROM  pear_project_log AS tl JOIN pear_task AS t ON tl.source_code = t.CODE JOIN pear_project AS p ON t.project_code = p.CODE JOIN pear_member AS m ON tl.member_code = m.CODE WHERE tl.action_type = 'task' AND p. CODE IN (SELECT  pp.CODE FROM pear_project AS pp JOIN pear_project_member AS pm  ON pm.project_code = pp.CODE WHERE pp.organization_code = #{params.orgCode} AND (  pm.member_code = #{params.memberCode} ) AND pp.deleted = 0 GROUP BY  pp.code ) AND p.deleted = 0 ORDER BY tl.id DESC")
+    @Select("SELECT tl.remark AS remark, tl.content AS content, tl.is_comment AS is_comment, tl.create_time AS create_time,  p. NAME AS project_name, t. NAME AS task_name, t. CODE AS source_code, p. CODE AS project_code, m.avatar AS member_avatar,  m. NAME AS member_name FROM  pear_project_log AS tl JOIN pear_task AS t ON tl.source_code = t.CODE JOIN pear_project AS p ON t.project_code = p.CODE JOIN pear_member AS m ON tl.member_code = m.CODE WHERE tl.action_type = 'task' AND p. CODE IN (SELECT  pp.CODE FROM pear_project AS pp JOIN pear_project_member AS pm  ON pm.project_code = pp.CODE WHERE pp.organization_code = #{params.orgCode} AND (  pm.member_code = #{params.memberCode} ) AND pp.deleted = 0 GROUP BY  pp.code ) AND p.deleted = 0 ORDER BY tl.id DESC")
     IPage<Map> selectLogBySelfProjectByMemberCode(IPage<Map> page, Map params);
 
     @Select({"<script>",
@@ -76,6 +76,8 @@ public interface ProjectMapper extends BaseMapper<Project> {
     List<String> selectProjectCodesByMemberAndOrg(@Param("params")Map params);
 
     IPage<Map> selectTaskLogByProjectCode(IPage<Map> page,List list);
+    @Select("select tl.type as type,tl.action_type as action_type,tl.source_code as source_code,tl.remark as remark,tl.content as content,tl.is_comment as is_comment,tl.create_time as create_time,p.name as project_name,p.code as project_code,m.avatar as member_avatar,m.name as member_name from pear_project_log as tl join pear_project as p on tl.project_code = p.code join pear_member as m on tl.member_code = m.code where p.code = #{projectCode} and p.deleted = 0 order by tl.id desc ")
+    IPage<Map> selectProjectLogByProjectCode(IPage<Map> page,String projectCode);
 
 }
 

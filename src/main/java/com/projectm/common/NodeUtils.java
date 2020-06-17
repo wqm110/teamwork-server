@@ -20,7 +20,7 @@ public class NodeUtils {
      * @param rootMenu
      * @return
      */
-    public static  List<Integer> getMenuIds(List<Map> sourceList,Map rootMenu)
+    public  List<Integer> getMenuIds(List<Map> sourceList,Map rootMenu)
     {
         List<Integer> result = new ArrayList<>();
         for (Map menu : sourceList) {
@@ -68,7 +68,9 @@ public class NodeUtils {
                 chilMenus.add(buildChilTree(menuNode));
             }
         }
-        pNode.put("children",chilMenus);
+        if(chilMenus.size()>0){
+            pNode.put("children",chilMenus);
+        }
         return pNode;
     }
 

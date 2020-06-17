@@ -76,7 +76,9 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
             if(CollectionUtils.isEmpty(projectCodes))return page;
             page = baseMapper.selectTaskLogByProjectCode(page,projectCodes);
         }else{
-            page = baseMapper.selectLogBySelfProjectByMemberCode(page,params);
+            //page = baseMapper.selectLogBySelfProjectByMemberCode(page,params);
+            page = baseMapper.selectProjectLogByProjectCode(page,projectCode);
+
             List<Map> record = page.getRecords();
             List resultRecord = new ArrayList();
             if(Optional.ofNullable(record).isPresent()){
@@ -186,6 +188,11 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
         LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Project::getCode, code);
         queryWrapper.eq(Project::getDeleted, 0);
+        return baseMapper.selectOne(queryWrapper);
+    }
+    public Project getProjectProjectByCode(String code){
+        LambdaQueryWrapper<Project> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Project::getCode, code);
         return baseMapper.selectOne(queryWrapper);
     }
 

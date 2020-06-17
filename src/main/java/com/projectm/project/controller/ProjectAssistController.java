@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.utils.StringUtils;
 import com.framework.common.AjaxResult;
+import com.projectm.common.BeanMapUtils;
 import com.projectm.common.CommUtils;
+import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
 import com.projectm.member.service.MemberService;
 import com.projectm.project.domain.*;
@@ -21,6 +23,7 @@ import com.projectm.web.BaseController;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -51,7 +54,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_features/edit")
+    @PostMapping("/project_features/edit")
     @ResponseBody
     public AjaxResult getProjectVersionEdit(@RequestParam Map<String,Object> mmap){
         String featuresCode = MapUtils.getString(mmap,"featuresCode");
@@ -80,7 +83,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_features/delete")
+    @PostMapping("/project_features/delete")
     @ResponseBody
     public AjaxResult getProjectVersionDelete(@RequestParam Map<String,Object> mmap){
         String featuresCode = MapUtils.getString(mmap,"featuresCode");
@@ -95,7 +98,7 @@ public class ProjectAssistController  extends BaseController {
      * @param创建项目版本库
      * @return
      */
-    @PostMapping("/project/project_features/save")
+    @PostMapping("/project_features/save")
     @ResponseBody
     public AjaxResult projectProjectFeaturesSave(@RequestParam Map<String,Object> mmap){
         String projectCode = MapUtils.getString(mmap,"projectCode");
@@ -138,7 +141,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/save")
+    @PostMapping("/project_version/save")
     @ResponseBody
     public AjaxResult getProjectVersionSave(@RequestParam Map<String,Object> mmap){
         Map memberMap = getLoginMember();
@@ -153,7 +156,7 @@ public class ProjectAssistController  extends BaseController {
         }
 
         Map m = projectFeaturesService.getProjectFeaturesByCode(featuresCode);
-        if(MapUtils.isNotEmpty(m)){
+        if(MapUtils.isEmpty(m)){
             return AjaxResult.warn("该版本库已失效");
         }
         m = projectVersionService.gettProjectVersionByNameAndFeaturesCode(name,featuresCode);
@@ -184,7 +187,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version")
+    @PostMapping("/project_version")
     @ResponseBody
     public AjaxResult getProjectVersion(@RequestParam Map<String,Object> mmap){
         String projectFeaturesCode = MapUtils.getString(mmap,"projectFeaturesCode");
@@ -193,12 +196,40 @@ public class ProjectAssistController  extends BaseController {
         }
         return AjaxResult.success(projectVersionService.getProjectVersion(projectFeaturesCode));
     }
+
+    @PostMapping("/project_version/removeVersionTask")
+    @ResponseBody
+    public AjaxResult removeVersionTask(@RequestParam Map<String,Object> mmap) throws Exception {
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        Map loginMember = getLoginMember();
+        /*Map taskMap = taskService.getTaskMapByCode(taskCode);
+        if(MapUtils.isEmpty(taskMap)){
+            return AjaxResult.warn("该任务已被失效");
+        }*/
+        Map taskMap = taskService.getTaskMapByCode(taskCode);
+
+        /*Task task = Task.builder().id(MapUtils.getInteger(taskMap,"id")).task_tag(MapUtils.getString(taskMap,"task_tag"))
+                .assign_to(MapUtils.getString(taskMap,"assign_to")).begin_time(MapUtils.getString(taskMap,"begin_time"))
+                .code(MapUtils.getString(taskMap,"code")).create_by(MapUtils.getString(taskMap,"create_by"))
+                .create_time(MapUtils.getString(taskMap,"create_time")).deleted_time(MapUtils.getString(taskMap,"delete_time"))
+                .description(MapUtils.getString(taskMap,"description")).end_time();*/
+        Task task = BeanMapUtils.mapToBean(taskMap,Task.class);
+        if(MapUtils.isEmpty(taskMap)){
+            return AjaxResult.warn("该任务已被失效");
+        }
+        if(StringUtils.isNotEmpty(MapUtils.getString(taskMap,"version_code"))){
+            task.setVersion_code("");
+            task.setFeatures_code("");
+            task = projectVersionService.removeVersionTask(task,MapUtils.getString(loginMember,"memberCode"),MapUtils.getString(taskMap,"version_code"));
+        }
+        return AjaxResult.success(task);
+    }
     /**
      * 项目版本删除
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/delete")
+    @PostMapping("/project_version/delete")
     @ResponseBody
     public AjaxResult projectVersionDelete(@RequestParam Map<String,Object> mmap){
         String versionCode = MapUtils.getString(mmap,"versionCode");
@@ -211,7 +242,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/_getVersionTask")
+    @PostMapping("/project_version/_getVersionTask")
     @ResponseBody
     public AjaxResult getVersionTask(@RequestParam Map<String,Object> mmap){
         String versionCode = MapUtils.getString(mmap,"versionCode");
@@ -237,7 +268,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/_getVersionLog")
+    @PostMapping("/project_version/_getVersionLog")
     @ResponseBody
     public AjaxResult getVersionLog(@RequestParam Map<String,Object> mmap){
         String versionCode = MapUtils.getString(mmap,"versionCode");
@@ -278,9 +309,9 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/addVersionTask")
+    @PostMapping("/project_version/addVersionTask")
     @ResponseBody
-    public AjaxResult addVersionTask(@RequestParam Map<String,Object> mmap){
+    public AjaxResult addVersionTask(@RequestParam Map<String,Object> mmap) throws Exception {
         String taskCodeList = MapUtils.getString(mmap,"taskCodeList");
         String versionCode = MapUtils.getString(mmap,"versionCode");
         Map memberMap = getLoginMember();
@@ -288,44 +319,44 @@ public class ProjectAssistController  extends BaseController {
         if(!CommUtils.isEmpty(taskCodeList)){
             JSONArray jsonArray = JSON.parseArray(taskCodeList);
             if(StringUtils.isNotEmpty(jsonArray)){
-                List<Task> saveTaskList = new ArrayList<>();
-                List<ProjectVersion> saveProjectVersionList = new ArrayList<>();
                 List<String> taskListName = new ArrayList<>();
-                Task task = null;ProjectVersion pv = null;
                 for (Object obj : jsonArray) {
-
                     Map taskMap = taskService.getTaskMapByCode(String.valueOf(obj));
                     if(MapUtils.isEmpty(taskMap)){
                         return AjaxResult.warn("该任务已被失效");
                     }
-                    if(!CommUtils.isEmpty(MapUtils.getString(taskMap,"version_code"))){
+                    String versionCodeTask = MapUtils.getString(taskMap,"version_code","0");
+                    if(!"0".equals(versionCodeTask) && StringUtils.isNotEmpty(versionCodeTask)){
                         return AjaxResult.warn("该任务已被关联");
                     }
                     Map versionMap = projectVersionService.getProjectVersionByCode(versionCode);
                     if(MapUtils.isEmpty(taskMap)){
                         return AjaxResult.warn("该版本已被失效");
                     }
-                    task = new Task();
-                    task.setId(MapUtils.getInteger(taskMap,"id"));task.setVersion_code(versionCode);task.setFeatures_code(MapUtils.getString(versionMap,"features_code"));
-                    saveTaskList.add(task);
-                    pv = new ProjectVersion();
-                    pv.setId(MapUtils.getInteger(versionMap,"id"));
-                    pv.setSchedule(projectVersionService.getScheduleByVersion(versionCode));
-                    saveProjectVersionList.add(pv);
-                    taskListName.add(MapUtils.getString(taskMap,"name"));
+                    Task task = projectVersionService.addVersionTask(taskMap,versionMap);
+                    if(!ObjectUtils.isEmpty(task)){
+                        taskListName.add(task.getName());
+                        successTotal ++;
+                    }
                 }
-                successTotal = projectVersionService.addVersionTask(saveTaskList,saveProjectVersionList);
-                if(successTotal>0){
+                /*if(successTotal>0){
                     Map projectVersion = projectVersionService.getProjectVersionByCode(versionCode);
                     ProjectVersionLog pvl = new ProjectVersionLog();
                     pvl.setMember_code(MapUtils.getString(memberMap,"memberCode")).setSource_code(versionCode);pvl.setRemark("添加了 " + successTotal + " 项目发布内容");
-                    pvl.setType("addVersionTask").setContent(taskListName.toString()).setCreate_time(DateUtil.formatDateTime(new Date()));
+                    pvl.setType("addVersionTask").setContent(StringUtils.join(taskListName,",")).setCreate_time(DateUtil.formatDateTime(new Date()));
                     pvl.setFeatures_code(MapUtils.getString(projectVersion,"features_code")).setIcon("link");
                     projectVersionLogService.save(pvl);
-                }
+                }*/
+                projectVersionService.run(new HashMap(){{
+                    put("memberCode",MapUtils.getString(memberMap,"memberCode"));
+                    put("versionCode",versionCode);
+                    put("type","addVersionTask");
+                    put("data",taskListName);
+                }});
             }
         }
-        Map result = new HashMap();result.put("successTotal",successTotal);
+        Map result = new HashMap();
+        result.put("successTotal",successTotal);
         return AjaxResult.success(result);
     }
     /**
@@ -333,7 +364,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/changeStatus")
+    @PostMapping("/project_version/changeStatus")
     @ResponseBody
     public AjaxResult projectVersionChangeStatus(@RequestParam Map<String,Object> mmap) {
         String versionCode = MapUtils.getString(mmap, "versionCode");
@@ -353,7 +384,7 @@ public class ProjectAssistController  extends BaseController {
         boolean i = projectVersionService.updateById(pv);
         ProjectVersionLog pvl = new ProjectVersionLog();
        pvl.setMember_code(MapUtils.getString(memberMap,"memberCode"));
-        pvl.setSource_code(versionCode).setRemark("更新了状态为"+ getStatusTextAttr(String.valueOf(status)));
+        pvl.setSource_code(versionCode).setRemark("更新了状态为"+ projectVersionService.getStatusTextAttr(String.valueOf(status)));
         pvl.setType("status").setContent("").setCreate_time(DateUtil.formatDateTime(new Date()));
         pvl.setFeatures_code(MapUtils.getString(versionMap,"features_code")).setIcon("check-square");
         projectVersionLogService.save(pvl);
@@ -364,7 +395,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/edit")
+    @PostMapping("/project_version/edit")
     @ResponseBody
     public AjaxResult projectVersionEdit(@RequestParam Map<String,Object> mmap){
         String versionCode = MapUtils.getString(mmap,"versionCode");
@@ -439,7 +470,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/project_version/read")
+    @PostMapping("/project_version/read")
     @ResponseBody
     public AjaxResult projectVersionRead(@RequestParam Map<String,Object> mmap){
         String versionCode = MapUtils.getString(mmap,"versionCode");
@@ -447,7 +478,7 @@ public class ProjectAssistController  extends BaseController {
             return AjaxResult.warn("请选择一个版本");
         }
         Map versionMap = projectVersionService.getProjectVersionByCode(versionCode);
-        versionMap.put("statusText",getStatusTextAttr(MapUtils.getString(versionMap,"status")));
+        versionMap.put("statusText",projectVersionService.getStatusTextAttr(MapUtils.getString(versionMap,"status")));
         if(MapUtils.isNotEmpty(versionMap)){
             Map featureMap = projectFeaturesService.getProjectFeaturesByCode(MapUtils.getString(versionMap,"features_code"));
             versionMap.put("featureName",MapUtils.getString(featureMap,"name"));
@@ -474,12 +505,18 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/file/recycle")
+    @PostMapping("/file/recycle")
     @ResponseBody
     public AjaxResult projectFileRecycle(@RequestParam Map<String,Object> mmap){
         String fileCode = MapUtils.getString(mmap,"fileCode");
 
         Map fileMap = fileService.getFileByCode(fileCode);
+        if(MapUtils.isEmpty(fileMap)){
+            return  AjaxResult.warn("文件不存在");
+        }
+        if(1== MapUtils.getInteger(fileMap,"deleted")){
+            return  AjaxResult.warn("文件已在回收站");
+        }
         com.projectm.task.domain.File projectFile = new com.projectm.task.domain.File();
         projectFile.setId(MapUtils.getInteger(fileMap,"id"));
         projectFile.setDeleted(1);projectFile.setDeleted_time(DateUtil.formatDateTime(new Date()));
@@ -490,7 +527,7 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/file/edit")
+    @PostMapping("/file/edit")
     @ResponseBody
     public AjaxResult projectFileEdit(@RequestParam Map<String,Object> mmap){
         String title = MapUtils.getString(mmap,"title");
@@ -508,19 +545,17 @@ public class ProjectAssistController  extends BaseController {
      * @param
      * @return
      */
-    @PostMapping("/project/file")
+    @PostMapping("/file")
     @ResponseBody
     public AjaxResult getProjectFile(@RequestParam Map<String,Object> mmap){
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",50);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
+
         String projectCode = MapUtils.getString(mmap,"projectCode");
         Integer deleted = MapUtils.getInteger(mmap,"deleted",0);
         Map params = new HashMap(){{
             put("projectCode",projectCode);
             put("deleted",deleted);
         }};
-        IPage<Map> iPage = new Page<>();
-        iPage.setCurrent(page);iPage.setSize(pageSize);
+        IPage<Map> iPage = Constant.createPage(mmap);
         iPage = fileService.gettFileByProjectCodeAndDelete(iPage,params);
         List<Map> resultList = new ArrayList<>();
         for(int i=0;iPage !=null && iPage.getRecords() !=null && i<iPage.getRecords().size();i++){
@@ -530,94 +565,8 @@ public class ProjectAssistController  extends BaseController {
             fileMap.put("fullName",MapUtils.getString(fileMap,"title")+"."+MapUtils.getString(fileMap,"extension"));
             resultList.add(fileMap);
         }
-        Map data = new HashMap();
-        data.put("list",resultList);
-        data.put("total",iPage.getTotal());
-        data.put("page",iPage.getCurrent());
+        iPage.setRecords(resultList);
+        Map data = Constant.createPageResultMap(iPage);
         return new AjaxResult(AjaxResult.Type.SUCCESS, "", data);
-
-    }
-
-    protected void versionHook(Map map){
-        ProjectVersionLog pvl = new ProjectVersionLog();
-        pvl.setCode(CommUtils.getUUID());pvl.setMember_code(MapUtils.getString(map,"memberCode"));
-        pvl.setSource_code(MapUtils.getString(map,"versionCode"));
-        pvl.setRemark(MapUtils.getString(map,"remark"));pvl.setType(MapUtils.getString(map,"type"));
-        pvl.setContent(MapUtils.getString(map,"content"));pvl.setCreate_time(DateUtil.formatDateTime(new Date()));
-        Map versionMap = projectVersionService.getProjectVersionByCode(MapUtils.getString(map,"versionCode"));
-        pvl.setFeatures_code(MapUtils.getString(versionMap,"features_code"));
-        String remark="",content="",icon = "";
-
-        String type = MapUtils.getString(map,"type");
-        if("create".equals(type)){
-            icon = "plus";
-            remark="创建了版本";
-            content = MapUtils.getString(versionMap,"name");
-        }else if("status".equals(type)){
-            icon = "check-square";
-            remark="更新了状态为"+getStatusTextAttr(MapUtils.getString(versionMap,"status"));
-        }else if("publish".equals(type)){
-            icon = "check-square";
-            remark="完成版本时间为 "+MapUtils.getString(versionMap,"publish_time");
-        }else if("name".equals(type)){
-            icon = "edit";
-            remark="更新了版本名";
-            content = MapUtils.getString(versionMap,"name");
-        }else if("content".equals(type)){
-            icon = "file-text";
-            remark="更新了备注";
-            content = MapUtils.getString(versionMap,"description");
-        }else if("clearContent".equals(type)){
-            icon = "file-text";
-            remark="清空了备注 ";
-        }else if("setStartTime".equals(type)){
-            icon = "calendar";
-            remark="更新开始时间为 " + MapUtils.getString(versionMap,"start_time");
-        }else if("clearStartTime".equals(type)){
-            icon = "calendar";
-            remark="清除了开始时间 ";
-        }else if("setPlanPublishTime".equals(type)){
-            icon = "calendar";
-            remark="更新计划发布时间为 " + MapUtils.getString(versionMap,"plan_publish_time");
-        }else if("clearPlanPublishTime".equals(type)){
-            icon = "calendar";
-            remark="清除了计划发布时间 ";
-        }else if("delete".equals(type)){
-            icon = "delete";
-            remark="删除了版本 ";
-        }else if("addVersionTask".equals(type)){
-
-
-        }else if("removeVersionTask".equals(type)){
-            icon = "disconnect";
-            remark="移除了发布内容";
-
-        }else{
-            icon = "plus";
-            remark="创建了版本";
-        }
-        pvl.setIcon(icon);
-        if(!CommUtils.isEmpty(MapUtils.getString(map,"remark"))){
-            pvl.setRemark(remark);
-        }
-
-        projectVersionLogService.save(pvl);
-    }
-    protected String getStatusTextAttr(String status){
-        //状态。0：未开始，1：进行中，2：延期发布，3：已发布
-        if(null == status){
-            return "-";
-        }
-        switch (Integer.parseInt(status)){
-            case 0:
-                return "未开始";
-            case 1:
-                return "进行中";
-            case 2:
-                return "延期发布";
-            case 3:
-                return "已发布";
-        }
-        return "-";
     }
 }

@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.AjaxResult;
 import com.framework.common.utils.StringUtils;
-import com.projectm.common.BeanMapUtils;
-import com.projectm.common.CommUtils;
-import com.projectm.common.Constant;
-import com.projectm.common.DateUtil;
+import com.projectm.common.*;
 import com.projectm.config.MProjectConfig;
 import com.projectm.member.domain.Member;
 import com.projectm.member.domain.MemberAccount;
@@ -18,13 +15,18 @@ import com.projectm.member.service.MemberService;
 import com.projectm.member.service.ProjectMemberService;
 import com.projectm.org.service.OrgService;
 import com.projectm.project.domain.*;
+import com.projectm.project.mapper.ProjectLogMapper;
 import com.projectm.project.service.*;
+import com.projectm.task.domain.Task;
 import com.projectm.task.domain.TaskStagesTemplete;
+import com.projectm.task.service.FileService;
+import com.projectm.task.service.TaskService;
 import com.projectm.task.service.TaskStagesTempleteService;
 import com.projectm.web.BaseController;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -87,34 +89,146 @@ public class ProjectController extends BaseController {
     @PostMapping("/project/getLogBySelfProject")
     @ResponseBody
     public AjaxResult getLogBySelfProject(@RequestParam Map<String,Object> mmap){
+        String projectCode = MapUtils.getString(mmap,"projectCode");
         Map loginMember = getLoginMember();
         IPage<Map> ipage = Constant.createPage(mmap);
         Map params = new HashMap();
         params.put("memberCode",MapUtils.getString(loginMember,"memberCode"));
         params.put("orgCode",MapUtils.getString(loginMember,"organizationCode"));
-        params.put("projectCode",MapUtils.getString(mmap,"projectCode"));
+        params.put("projectCode",projectCode);
 
         IPage<Map> resultData =  proService.getLogBySelfProject(ipage,params);
 
         if(null != resultData){
-            return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultData.getRecords());
+            if(StringUtils.isEmpty(projectCode)){
+                return new AjaxResult(AjaxResult.Type.SUCCESS, "", resultData.getRecords());
+            }else{
+                return  AjaxResult.success(Constant.createPageResultMap(ipage));
+            }
         }
         return AjaxResult.success();
-
     }
+
+    @Autowired
+    TaskService taskService;
+    @Autowired
+    ProjectLogMapper projectLogMapper;
+    @PostMapping("/project/_projectStats")
+    @ResponseBody
+    public AjaxResult _projectStats(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String projectCode = MapUtils.getString(mmap,"projectCode");
+        if(StringUtils.isEmpty(projectCode)){
+            return AjaxResult.warn("该项目已失效");
+        }
+        Map projectMap = proService.getProjectByCode(projectCode);
+        if(MapUtils.isEmpty(projectMap)){
+            return AjaxResult.warn("该项目已失效");
+        }
+        List<Map> taskList = taskService.getTaskByProjectCodeAndDel(projectCode,0);
+        if(CollectionUtils.isEmpty(taskList)){
+            taskList = new ArrayList<>();
+        }
+        Integer total=0;
+        Integer unDone=0;
+        Integer done=0;
+        Integer overdue=0;
+        Integer toBeAssign =  0 ;
+        Integer expireToday=0;
+        Integer doneOverdue=0;
+        Date now = new Date();
+        String today = DateUtil.format("yyyy-MM-dd HH:mm:ss",now);
+        String tomorrow = DateUtil.format("yyyy-MM-dd HH:mm:ss",DateUtil.add(now,5,-1));
+        String nowTime = DateUtil.format("yyyy-MM-dd HH:mm:ss",now);
+        for(Map task:taskList){
+            if(StringUtils.isNotEmpty(MapUtils.getString(task,"assign_to"))){  toBeAssign++;}
+            if(1==MapUtils.getInteger(task,"done",0)){ done ++;}
+            if(0==MapUtils.getInteger(task,"done",0)){ unDone ++;}
+            String endtime = MapUtils.getString(task,"end_time");
+            if(StringUtils.isNotEmpty(MapUtils.getString(task,"end_time"))){
+                if(0==MapUtils.getInteger(task,"done",0)){
+                    if(-1 == endtime.compareTo(nowTime)){
+                        overdue++;
+                    }
+                    if(endtime.compareTo(tomorrow) == -1 && endtime.compareTo(today) >=0){
+                        doneOverdue++;
+                    }
+                }else{
+                    List<Map> list = projectLogMapper.selectProjectLogBySourceCode(MapUtils.getString(task,"done"));
+                    if(!CollectionUtils.isEmpty(list)){
+                        Map m = list.get(0);
+                        String createTime = MapUtils.getString(m,"create_time");
+                        if(endtime.compareTo(createTime) == -1){
+                            doneOverdue++;
+                        }
+                    }
+                }
+            }
+        }
+        Map data = new HashMap();
+        data.put("total", taskList.size());
+        data.put("unDone",unDone);
+        data.put("done",done);
+        data.put("overdue",overdue);
+        data.put("toBeAssign",toBeAssign);
+        data.put("expireToday",expireToday);
+        data.put("doneOverdue",doneOverdue);
+        return AjaxResult.success(data);
+    }
+
+    @Autowired
+    ProjectReportService projectReportService;
+    @PostMapping("/project/_getProjectReport")
+    @ResponseBody
+    public AjaxResult _getProjectReport(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String projectCode = MapUtils.getString(mmap, "projectCode");
+        if(StringUtils.isEmpty(projectCode)){
+            return AjaxResult.success("项目已失效");
+        }
+        return AjaxResult.success(projectReportService.getReportByDay(projectCode,10));
+    }
+
+    @Autowired
+    FileService fileService;
 
     @PostMapping("/file/uploadFiles")
     @ResponseBody
-    public AjaxResult uploadFiels(HttpServletRequest request, @RequestParam("avatar") MultipartFile multipartFile)  throws Exception{
+    public AjaxResult uploadFiels(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)  throws Exception{
+        String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
         String  fileName= request.getParameter("identifier");
         String  orgFileName= request.getParameter("filename");
         String  chunkNumber= request.getParameter("chunkNumber");
         String  totalChunks= request.getParameter("totalChunks");
+        String  taskCode= request.getParameter("taskCode");
+        String projectCode = request.getParameter("projectCode");
         Map loginMember = getLoginMember();
         String orgCode = MapUtils.getString(loginMember,"organizationCode");
         String memberCode = MapUtils.getString(loginMember,"memberCode");
-        return AjaxResult.success();
+        if (multipartFile.isEmpty()) {
+            return  AjaxResult.warn("文件名不能为空！");
+        } else {
+            String dateTimeNow = DateUtils.dateTimeNow();
+            String date = DateUtils.getDate();
+            // 文件原名称
+            String originFileName = multipartFile.getOriginalFilename().toString();
+            // 上传文件重命名
+            String uploadFileName = CommUtils.getUUID()+multipartFile.getOriginalFilename().toString().substring(multipartFile.getOriginalFilename().toString().indexOf("."));
+            String file_url = MProjectConfig.getUploadFolderPath()+memberCode+"/"+date+"/"+dateTimeNow+uploadFileName;
+            // 这里使用Apache的FileUtils方法来进行保存
+            FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(file_url, uploadFileName));
+            com.projectm.task.domain.File file = com.projectm.task.domain.File.builder().fsize(multipartFile.getSize())
+                    .path_name(file_url).file_url(basePath+file_url).title(multipartFile.getOriginalFilename()).file_type("text/plain").create_time(DateUtils.dateTimeNow())
+                    .code(CommUtils.getUUID()).organization_code(orgCode).project_code(projectCode).create_by(memberCode)
+                    .deleted(0).downloads(0l).task_code(taskCode).build();
+            Project project = fileService.uploadFiles(file,memberCode,projectCode);
+            Map result = new HashMap();
+            result.put("key",file.getPath_name());
+            result.put("url",file.getFile_url());
+            result.put("projectName",project.getName());
+            return AjaxResult.success(result);
+        }
     }
+
+
 
     /**
      * 上传头像
@@ -161,6 +275,20 @@ public class ProjectController extends BaseController {
          return  AjaxResult.success(resMap);
     }
 
+    @Autowired
+    SourceLinkService sourceLinkService;
+
+    @PostMapping("/source_link/delete")
+    @ResponseBody
+    public AjaxResult sourceLinkDel(@RequestParam Map<String,Object> mmap){
+        String sourceCode = MapUtils.getString(mmap,"sourceCode");
+        Map loginMap = getLoginMember();
+        if(StringUtils.isEmpty(sourceCode)){
+            return AjaxResult.warn("资源不存在！");
+        }
+        int i = sourceLinkService.deleteSource(sourceCode,MapUtils.getString(loginMap,"memberCode"));
+        return AjaxResult.success(i);
+    }
 
     /**
      * 项目管理	我的项目 项目设置 项目删除（回收站）

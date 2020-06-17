@@ -19,4 +19,10 @@ public class ProjectNodeService extends ServiceImpl<ProjectNodeMapper, ProjectNo
     public List<Map> getAllProjectNode(){
         return baseMapper.selectAllProjectNode();
     }
+
+    public void get(String module){
+        if("project".equals(module)){
+
+        }
+    }
 }

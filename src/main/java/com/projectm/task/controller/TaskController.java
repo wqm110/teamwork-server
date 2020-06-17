@@ -179,7 +179,7 @@ public class TaskController  extends BaseController {
         Map taskMap = taskService.getTaskMapByCode(taskCode);
         ProjectLog projectLog = new ProjectLog();
         if(MapUtils.isNotEmpty(taskMap)){
-            task.setId(MapUtils.getInteger(taskMap,"id"));
+            task.setId(MapUtils.getLong(taskMap,"id"));
             if(StringUtils.isNotEmpty(end_time)){
                 task.setEnd_time(end_time);
                 projectLog.setRemark("更新截止时间为 "+end_time);
@@ -282,6 +282,32 @@ public class TaskController  extends BaseController {
         return AjaxResult.success(Constant.createPageResultMap(page));
     }
 
+    @PostMapping("/task/dateTotalForProject")
+    @ResponseBody
+    public AjaxResult dateTotalForProject(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String projectCode = MapUtils.getString(mmap, "projectCode");
+        String beginTime = MapUtils.getString(mmap, "beginTime");
+        String endTime = MapUtils.getString(mmap, "endTime");
+        Date now = new Date();
+        if(StringUtils.isEmpty(beginTime)){
+            beginTime=DateUtil.format("yyyy-MM-dd",DateUtil.add(now,5,-20));
+        }
+        if(StringUtils.isEmpty(endTime)){
+            endTime = DateUtil.format("yyyy-MM-dd",now);
+        }
+        List<String> dateList = DateUtil.findDaysStr(beginTime,endTime);
+        List<Map> mapList = new ArrayList<>();
+        dateList.stream().forEach(s -> {
+            String start = s + " 00:00:00";
+            String end = s + "23:59:59";
+            Integer total = taskService.getDateTaskTotalForProject(projectCode,start,end);
+            mapList.add(new HashMap(){{
+                put("date",s);
+                put("total",total);
+            }});
+        });
+        return AjaxResult.success(mapList);
+    }
 
     /**
      * 项目管理	我的项目 项目打开 任务清单 打开任务详情 编辑工时

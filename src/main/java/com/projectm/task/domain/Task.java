@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.projectm.domain.BaseDomain;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -17,10 +14,11 @@ import java.io.Serializable;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Task extends BaseDomain implements Serializable {
 
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Long id;
     @TableField("code")
     private String code;
     @TableField("project_code")
@@ -57,8 +55,13 @@ public class Task extends BaseDomain implements Serializable {
     private String pcode;
     @TableField("sort")
     private Integer sort;
-    @TableField("like")
+    @TableField("liked")
+    private Integer liked;
+    @TableField(exist = false)
     private Integer like;
+    public Integer getLike(){
+        return liked;
+    }
     @TableField("star")
     private Integer star;
     @TableField("deleted_time")

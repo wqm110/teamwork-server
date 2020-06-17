@@ -8,6 +8,7 @@ import com.framework.common.utils.StringUtils;
 import com.framework.common.AjaxResult;
 import com.projectm.common.CommUtils;
 import com.projectm.common.DateUtil;
+import com.projectm.common.NodeUtils;
 import com.projectm.project.domain.ProjectAuth;
 import com.projectm.project.domain.ProjectAuthNode;
 import com.projectm.project.domain.ProjectMenu;
@@ -297,6 +298,38 @@ public class AuthorityControoler extends BaseController {
         String module = MapUtils.getString(mmap,"module");
         String node = MapUtils.getString(mmap,"node");
         return AjaxResult.success(projectNodeService.getProjectNodeByNodeLike(node));
+    }
+
+    @PostMapping("/node/clear")
+    @ResponseBody
+    public AjaxResult nodeClear(@RequestParam Map<String,Object> mmap)  throws Exception
+    {
+        return AjaxResult.success("无效节点清单成功！");
+    }
+    @PostMapping("/node")
+    @ResponseBody
+    public AjaxResult nodeIndex(@RequestParam Map<String,Object> mmap)  throws Exception
+    {
+        String module = MapUtils.getString(mmap,"module");
+        List<Map> listNode = projectNodeService.getAllProjectNode();
+        NodeUtils nus = new NodeUtils();
+        nus.refreshNodeListsIgnore(listNode);
+        List<Map> nodeTree = nus.builTree();
+        List<Map> groups = new ArrayList<>();
+        for(Map map:nodeTree){
+            Map pnodeMap = new HashMap();
+            String node = MapUtils.getString(map,"node","");
+            String pnode = node.split("/")[0];
+            if(node.equals(pnode)){
+                pnodeMap.put("node",map);
+            }
+            pnodeMap.put("list",map);
+            groups.add(pnodeMap);
+        }
+        Map result = new HashMap();
+        result.put("nodes",nodeTree);
+        result.put("groups",groups);
+        return AjaxResult.success(result);
     }
 
     /**

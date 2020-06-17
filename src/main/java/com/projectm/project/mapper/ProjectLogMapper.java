@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
@@ -17,5 +18,8 @@ public interface ProjectLogMapper  extends BaseMapper<ProjectLog> {
 
     @Select("SELECT * FROM pear_project_log WHERE source_code = #{params.sourceCode} AND action_type = #{params.actionType}")
     IPage<Map> selectProjectLogByParam(IPage<Map> iPage, @Param("params") Map params);
+
+    @Select("select * from pear_project_log where action_type='task' and source_code=#{sourceCode} and type='done' order by id desc ")
+    List<Map> selectProjectLogBySourceCode(String sourceCode);
 
 }

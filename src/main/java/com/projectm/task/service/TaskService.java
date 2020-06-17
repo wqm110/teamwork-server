@@ -45,6 +45,12 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
         taskQW.eq(Task::getCode, code);
         return baseMapper.selectOne(taskQW);
     }
+    public List<Map> getTaskByProjectCodeAndDel(String projectCode,Integer deleted){
+        LambdaQueryWrapper<Task> taskQW = new LambdaQueryWrapper<>();
+        taskQW.eq(Task::getProject_code, projectCode);
+        taskQW.eq(Task::getDeleted,deleted);
+        return baseMapper.selectTaskByProjectCodeAndDel(projectCode,deleted);
+    }
 
     public List<Map> getTaskByParams(Map params){
         return baseMapper.selectTaskByParams(params);
@@ -290,6 +296,9 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
         }
         return stared;
     }
+    public Integer getDateTaskTotalForProject(String projectCode,String beginTime,String endTime){
+        return baseMapper.selectDateTaskTotalForProject(projectCode,beginTime,endTime);
+    }
 
     public Map buildTaskMap(Map task,String memberCode){
         String taskCode = MapUtils.getString(task,"code");
@@ -365,8 +374,6 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
         page.setRecords(result);
         return page;
     }
-
-
 
 
 }
