@@ -17,29 +17,29 @@ import java.util.Map;
 @Mapper
 public interface MemberAccountMapper extends BaseMapper<MemberAccount> {
 
-    @Select("SELECT * FROM pear_member_account WHERE organization_code = #{orgCode} ")
+    @Select("SELECT * FROM team_member_account WHERE organization_code = #{orgCode} ")
     List<Map> getMemberCountByOrgCode(String orgCode);
 
-    @Select("SELECT * FROM pear_member_account A WHERE A.name LIKE CONCAT('%',#{name},'%') AND A.organization_code = #{orgCode}")
+    @Select("SELECT * FROM team_member_account A WHERE A.name LIKE CONCAT('%',#{name},'%') AND A.organization_code = #{orgCode}")
     List<Map> getMemberCountByOrgCodeAndMemberName(String orgCode,String name);
 
-    @Select("SELECT * FROM pear_member_account WHERE member_code = #{memberCode} AND organization_code = #{orgCode} LIMIT 1")
+    @Select("SELECT * FROM team_member_account WHERE member_code = #{memberCode} AND organization_code = #{orgCode} LIMIT 1")
     Map selectMemberAccountByMemCodeAndOrgCode(String memberCode,String orgCode);
 
 
-    @Select("SELECT * FROM pear_member_account WHERE organization_code = #{params.orgCode} AND status = #{params.status} AND department_code LIKE CONCAT('%',#{params.depCode},'%') ORDER BY id ASC")
+    @Select("SELECT * FROM team_member_account WHERE organization_code = #{params.orgCode} AND status = #{params.status} AND department_code LIKE CONCAT('%',#{params.depCode},'%') ORDER BY id ASC")
     IPage<Map> selectMemberAccountByOrgCodeStatusDeptCode(IPage<Map> page, @Param("params") Map params);
 
-    @Select("SELECT * FROM pear_member_account WHERE organization_code = #{params.orgCode} AND status = #{params.status} ORDER BY id ASC")
+    @Select("SELECT * FROM team_member_account WHERE organization_code = #{params.orgCode} AND status = #{params.status} ORDER BY id ASC")
     IPage<Map> selectMemberAccountByOrgCodeAndStatus(IPage<Map> page, @Param("params") Map params);
 
-    @Select("SELECT * FROM pear_member_account WHERE code = #{memAccCode} ")
+    @Select("SELECT * FROM team_member_account WHERE code = #{memAccCode} ")
     Map selectMemberAccountByCode(String memAccCode);
 
-    @Select("SELECT * FROM pear_member_account WHERE member_code = #{memCode} ")
+    @Select("SELECT * FROM team_member_account WHERE member_code = #{memCode} ")
     Map selectMemberAccountByMemCode(String memCode);
 
-    @Delete("DELETE FROM pear_department_member WHERE account_code = #{accCode} AND organization_code = #{orgCode}")
+    @Delete("DELETE FROM team_department_member WHERE account_code = #{accCode} AND organization_code = #{orgCode}")
     Integer deleteDepartmentMemberByAccCodeAndOrgCode(String accCode,String orgCode);
 
 

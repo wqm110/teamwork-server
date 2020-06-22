@@ -24,7 +24,7 @@ public class TaskStagesTempleteService  extends ServiceImpl<TaskStagesTempleteMa
 
 
     public IPage<Map> getTaskStagesTemplate(IPage<Map> ipage, String code){
-        String sql = "select * from pear_task_stages_template as pt where pt.project_template_code='%s'";
+        String sql = "select * from team_task_stages_template as pt where pt.project_template_code='%s'";
         ipage = commMapper.customQueryItem(ipage,String.format(sql,code));
         return ipage;
     }

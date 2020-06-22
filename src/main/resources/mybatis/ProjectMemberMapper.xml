@@ -36,15 +36,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>-->
 
 	<select id="selectMemberByLoginParam" resultType="java.util.Map" parameterType="java.util.Map">
-		SELECT * FROM pear_member WHERE  account = #{params.account} OR email = #{params.account}  OR mobile = #{params.account} ORDER BY id ASC LIMIT 1
+		SELECT * FROM team_member WHERE  account = #{params.account} OR email = #{params.account}  OR mobile = #{params.account} ORDER BY id ASC LIMIT 1
 	</select>
 
 	<select id="selectMemberCountByMemberCode" resultType="java.util.Map" parameterType="java.util.Map">
-		SELECT * FROM pear_member_account WHERE  member_code = #{params.memberCode} ORDER BY id ASC
+		SELECT * FROM team_member_account WHERE  member_code = #{params.memberCode} ORDER BY id ASC
 	</select>
 
 	<select id="getMemberById" resultType="java.util.Map" >
-		SELECT * FROM pear_member WHERE code = #{userCode}
+		SELECT * FROM team_member WHERE code = #{userCode}
 	</select>
 
 

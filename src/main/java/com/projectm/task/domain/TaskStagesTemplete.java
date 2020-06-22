@@ -8,7 +8,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@TableName("pear_task_stages_template")
+@TableName("team_task_stages_template")
 @Data
 @Builder
 @ToString

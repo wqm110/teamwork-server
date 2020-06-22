@@ -4,12 +4,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.AjaxResult;
 import com.framework.common.utils.ServletUtils;
+import com.framework.common.utils.StringUtils;
+import com.framework.utils.FileUtils;
 import com.projectm.common.Constant;
 import com.projectm.common.DateUtils;
+import com.projectm.config.MProjectConfig;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import java.util.HashMap;
@@ -102,4 +108,37 @@ public class BaseController {
         //member.put("memberCountCode","6v7be19pwman2fird04gqu11");
         return member;
     }
+
+    /**
+     * 通用下载请求
+     *
+     * @param filePathName 文件路径和文件名称
+     * @param delete 是否删除
+     */
+    /*@GetMapping("/common/download")
+    public void fileDownload(String filePathName,String realFileName, Boolean delete)
+    {
+        try
+        {
+            if (!FileUtils.isValidFilename(filePathName))
+            {
+                throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", filePathName));
+            }
+            String filePath = MProjectConfig.getDownloadPath() + filePathName;
+
+            ServletUtils.getResponse().setCharacterEncoding("utf-8");
+            ServletUtils.getResponse().setContentType("multipart/form-data");
+            ServletUtils.getResponse().setHeader("Content-Disposition",
+                    "attachment;fileName=" + FileUtils.setFileDownloadHeader(ServletUtils.getRequest(), realFileName));
+            FileUtils.writeBytes(filePath, ServletUtils.getResponse().getOutputStream());
+            if (delete)
+            {
+                FileUtils.deleteFile(filePath);
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    }*/
 }

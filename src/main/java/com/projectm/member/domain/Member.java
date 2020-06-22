@@ -10,7 +10,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.List;
 
-@TableName("pear_member")
+@TableName("team_member")
 @Data
 @ToString
 @NoArgsConstructor

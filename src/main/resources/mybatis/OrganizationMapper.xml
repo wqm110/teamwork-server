@@ -20,7 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="selectOrganizationByMemberCode" resultMap="organizationResult" >
 		select c.*
-		from pear_member a,pear_member_account b,pear_organization c
+		from team_member a,team_member_account b,team_organization c
 		where a.code = b.member_code and b.organization_code = c.code
 		and a.code = #{memberCode}
 	</select>

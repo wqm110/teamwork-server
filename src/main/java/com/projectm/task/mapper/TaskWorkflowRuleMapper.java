@@ -14,7 +14,7 @@ import java.util.Map;
 @Mapper
 public interface TaskWorkflowRuleMapper extends BaseMapper<TaskWorkflowRule> {
 
-    @Select("SELECT * FROM pear_task_workflow_rule A WHERE A.workflow_code = #{workflowCode} ORDER BY sort ASC")
+    @Select("SELECT * FROM team_task_workflow_rule A WHERE A.workflow_code = #{workflowCode} ORDER BY sort ASC")
     List<Map> selectTaskWorkflowRuleByWorkflowCode(String workflowCode);
 }
 

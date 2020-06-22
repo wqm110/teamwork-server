@@ -15,13 +15,13 @@ import java.util.Map;
 @Mapper
 public interface DepartmentMapper  extends BaseMapper<Department> {
 
-    @Select("SELECT * FROM pear_department WHERE organization_code = #{orgCode} AND pcode = #{pCode} ORDER BY id")
+    @Select("SELECT * FROM team_department WHERE organization_code = #{orgCode} AND pcode = #{pCode} ORDER BY id")
     IPage<Map> selectDepartmentByOrgCodeAndPCode(IPage<Map> page,String orgCode,String pCode);
 
-    @Select("SELECT * FROM pear_department WHERE code=#{depCode}")
+    @Select("SELECT * FROM team_department WHERE code=#{depCode}")
     Map selectDepartmentByCode(String depCode);
 
-    @Delete("DELETE FROM pear_department WHERE code = #{depCode}")
+    @Delete("DELETE FROM team_department WHERE code = #{depCode}")
     Integer deleteDepartmentByCode(String depCode);
 
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@TableName("pear_project_info")
+@TableName("team_project_info")
 @Data
 @ToString
 @NoArgsConstructor

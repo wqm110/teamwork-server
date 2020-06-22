@@ -107,9 +107,9 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
         String sql = null;
         String field = " pp.cover,pp.name,pp.code,pp.description,pp.access_control_type,pp.white_list,pp.order,pp.deleted,pp.template_code,pp.schedule,pp.create_time,pp.organization_code,pp.deleted_time,pp.private, pp.prefix, pp.open_prefix, pp.archive, pp.archive_time, pp.open_begin_time,pp.open_task_private,pp.task_board_theme,pp.begin_time,pp.end_time,pp.auto_update_schedule";
         if("my".equals(type) || "other".equals(type)){
-            sql = String.format("select "+field+",pm.id,pm.project_code,pm.member_code from pear_project as pp left join pear_project_member as pm on pm.project_code = pp.code where pp.organization_code = '%s' and (pm.member_code = '%s' or pp.private = 0)",orgCode,memberCode);
+            sql = String.format("select "+field+",pm.id,pm.project_code,pm.member_code from team_project as pp left join team_project_member as pm on pm.project_code = pp.code where pp.organization_code = '%s' and (pm.member_code = '%s' or pp.private = 0)",orgCode,memberCode);
         }else{
-            sql = String.format("select "+field+" from pear_project as pp left  join pear_project_collection as pc on pc.project_code = pp.code where pp.organization_code = '%s' and pc.member_code = '%s' ",orgCode,memberCode);
+            sql = String.format("select "+field+" from team_project as pp left  join team_project_collection as pc on pc.project_code = pp.code where pp.organization_code = '%s' and pc.member_code = '%s' ",orgCode,memberCode);
         }
 
         if(!"other".equals(type)){

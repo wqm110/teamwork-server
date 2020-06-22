@@ -15,7 +15,7 @@ import java.util.Map;
 @Mapper
 public interface NotifyMapper extends BaseMapper<Notify> {
 
-    @Select("SELECT * FROM pear_notify WHERE to = #{params.to} AND terminal = #{params.terminal} ")
+    @Select("SELECT * FROM team_notify WHERE to = #{params.to} AND terminal = #{params.terminal} ")
     IPage<Map> getAllNotifyByParams(IPage<Map> page, @Param("params") Map params);
 
 }

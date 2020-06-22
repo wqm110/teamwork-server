@@ -15,7 +15,7 @@ import org.thymeleaf.util.ListUtils;
 import java.io.Serializable;
 import java.util.List;
 
-@TableName("pear_project_menu")
+@TableName("team_project_menu")
 @Data
 @ToString
 @NoArgsConstructor

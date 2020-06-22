@@ -14,6 +14,6 @@ import java.util.Map;
 @Mapper
 public interface TaskMemberMapper  extends BaseMapper<TaskMember> {
 
-    @Select("SELECT * FROM pear_task_member WHERE task_code = #{taskCode} ORDER BY is_owner")
+    @Select("SELECT * FROM team_task_member WHERE task_code = #{taskCode} ORDER BY is_owner")
     IPage<Map> selectTaskMemberByTaskCode(IPage<Map> page, String taskCode);
 }

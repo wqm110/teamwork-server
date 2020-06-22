@@ -14,7 +14,7 @@ import java.util.Map;
 @Mapper
 public interface ProjectInfoMapper  extends BaseMapper<ProjectInfo> {
 
-    @Select("SELECT * FROM pear_project_info WHERE project_code = #{projectCode} ORDER BY id DESC")
+    @Select("SELECT * FROM team_project_info WHERE project_code = #{projectCode} ORDER BY id DESC")
     List<Map> selectProjectInfoByProjectCode(String projectCode);
 
 }

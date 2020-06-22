@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.projectm.task.mapper.TaskMapper">
 
 	<select id="selectTaskListByParam" resultType="java.util.Map" parameterType="java.util.Map">
-		SELECT * FROM pear_task a WHERE  1=1
+		SELECT * FROM team_task a WHERE  1=1
 		<if test="params.stageCode != null and params.stageCode != ''">
 			AND a.stage_code = #{params.stageCode}
 		</if>

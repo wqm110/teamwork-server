@@ -9,7 +9,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@TableName("pear_project")
+@TableName("team_project")
 @Data
 @ToString
 @NoArgsConstructor

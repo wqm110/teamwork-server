@@ -12,7 +12,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
-@TableName("pear_task_workflow_rule")
+@TableName("team_task_workflow_rule")
 @Data
 @ToString
 @NoArgsConstructor

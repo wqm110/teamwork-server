@@ -17,9 +17,9 @@ public interface ProjectAuthNodeMapper  extends BaseMapper<ProjectAuthNode> {
 
     Integer delProjectAuthNodeByAuthCodes(Map params);
 
-    @Delete("DELETE FROM pear_project_auth_node WHERE auth = #{authId}")
+    @Delete("DELETE FROM team_project_auth_node WHERE auth = #{authId}")
     Integer deleteProjectAuthNodeByAuth(Integer authId);
 
-    @Select("SELECT * FROM pear_project_auth_node WHERE auth = #{authId}")
+    @Select("SELECT * FROM team_project_auth_node WHERE auth = #{authId}")
     List<Map> selectProjectAuthNodeByAuth(Integer authId);
 }

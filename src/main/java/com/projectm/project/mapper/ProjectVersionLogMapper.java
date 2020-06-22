@@ -15,10 +15,10 @@ import java.util.Map;
 @Mapper
 public interface ProjectVersionLogMapper  extends BaseMapper<ProjectVersionLog> {
 
-    @Select("SELECT * FROM pear_project_version_log WHERE source_code = #{sourceCode} ORDER BY id ASC")
+    @Select("SELECT * FROM team_project_version_log WHERE source_code = #{sourceCode} ORDER BY id ASC")
     IPage<Map> selectProjectVersionLogBySourceCode(IPage<Map> page, String sourceCode);
 
-    @Select("SELECT * FROM pear_project_version_log WHERE source_code = #{sourceCode} ORDER BY id ASC")
+    @Select("SELECT * FROM team_project_version_log WHERE source_code = #{sourceCode} ORDER BY id ASC")
     List<Map> selectProjectVersionLogBySourceCodeAll(String sourceCode);
 
 

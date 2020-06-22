@@ -15,10 +15,10 @@ import java.util.Map;
 @Mapper
 public interface TaskWorkflowMapper extends BaseMapper<TaskWorkflow> {
 
-    @Select("SELECT * FROM pear_task_workflow A WHERE A.project_code = #{projectCode} ORDER BY A.id ASC")
+    @Select("SELECT * FROM team_task_workflow A WHERE A.project_code = #{projectCode} ORDER BY A.id ASC")
     List<Map> selectTaskWorkflowByProjectCode(String projectCode);
 
-    @Delete("DELETE FROM pear_task_workflow WHERE code = #{workflowCode}")
+    @Delete("DELETE FROM team_task_workflow WHERE code = #{workflowCode}")
     int deleteTaskWorkflowByCode(String workflowCode);
 }
 

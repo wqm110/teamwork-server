@@ -13,6 +13,6 @@ import java.util.Map;
 @Mapper
 public interface InviteLinkMapper extends BaseMapper<InviteLink> {
 
-    @Select("SELECT * FROM pear_invite_link WHERE invite_type = #{params.inviteType} AND source_code = #{params.sourceCode} AND create_by = #{params.createBy}")
+    @Select("SELECT * FROM team_invite_link WHERE invite_type = #{params.inviteType} AND source_code = #{params.sourceCode} AND create_by = #{params.createBy}")
     Map getInviteLinkByParams(@Param("params") Map params);
 }

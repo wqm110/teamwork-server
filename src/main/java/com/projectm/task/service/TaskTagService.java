@@ -40,7 +40,7 @@ public class  TaskTagService  extends ServiceImpl<TaskTagMapper, TaskTag> {
     MemberService memberService;
 
     public IPage<Map> selectListByTaskTag(IPage<Map> page, String taskTagCode){
-        String sql = String.format("select t.* from pear_task_to_tag as tt join pear_task as t on tt.task_code = t.code where tt.tag_code = '%s' order by t.id desc",taskTagCode);
+        String sql = String.format("select t.* from team_task_to_tag as tt join team_task as t on tt.task_code = t.code where tt.tag_code = '%s' order by t.id desc",taskTagCode);
         page = commMapper.customQueryItem(page,sql);
         List<Map> record = page.getRecords();
         List<Map> result = new ArrayList<>();

@@ -17,14 +17,14 @@ public interface ProjectTemplateMapper extends BaseMapper<ProjectTemplate> {
 
     @Select({"<script>",
             "SELECT id, name, description, sort, create_time, code,organization_code, cover, member_code, is_system",
-            " FROM pear_project_template ",
+            " FROM team_project_template ",
             "WHERE organization_code = #{params.orgCode}" ,
             "<if test='params.isSystem!=null and params.isSystem != -1 '>",
             "AND is_system <![CDATA[ = ]]> #{params.isSystem}",
             "</if>","</script>"})
     IPage<Map> getProTemplateByOrgCode(IPage<Map> iPage, @Param("params") Map params);
 
-    @Select("SELECT * FROM pear_project_template A WHERE A.code = #{code} ")
+    @Select("SELECT * FROM team_project_template A WHERE A.code = #{code} ")
     Map getProjectTemplateByCode(String code);
 }
 

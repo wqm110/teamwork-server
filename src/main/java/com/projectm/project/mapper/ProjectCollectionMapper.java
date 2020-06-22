@@ -14,7 +14,7 @@ import java.util.Map;
 @Mapper
 public interface ProjectCollectionMapper extends BaseMapper<ProjectCollection> {
 
-    @Select("SELECT * FROM pear_project_collection A  WHERE A.project_code = #{projectCode} and A.member_code = #{memberCode}")
+    @Select("SELECT * FROM team_project_collection A  WHERE A.project_code = #{projectCode} and A.member_code = #{memberCode}")
     List<Map> selectProjectCollection(String projectCode, String memberCode);
 }
 

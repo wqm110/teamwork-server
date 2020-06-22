@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@TableName("pear_task_stages")
+@TableName("team_task_stages")
 @Data
 @ToString
 @NoArgsConstructor

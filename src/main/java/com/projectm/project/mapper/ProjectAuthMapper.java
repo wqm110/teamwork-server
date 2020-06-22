@@ -16,12 +16,12 @@ import java.util.Map;
 @Mapper
 public interface ProjectAuthMapper  extends BaseMapper<ProjectAuth> {
 
-    @Select("SELECT * FROM pear_project_auth WHERE status = #{status} AND organization_code = #{orgCode}")
+    @Select("SELECT * FROM team_project_auth WHERE status = #{status} AND organization_code = #{orgCode}")
     List<Map> selectProjectAuthByStatusAndOrgCode(String status, String orgCode);
 
-    @Select("SELECT * FROM pear_project_auth WHERE organization_code = #{orgCode} ORDER BY id DESC ")
+    @Select("SELECT * FROM team_project_auth WHERE organization_code = #{orgCode} ORDER BY id DESC ")
     IPage<Map> selectProjectAuthByOrgCode(IPage<Map> ipage, String orgCode);
 
-    @Update("UPDATE pear_project_auth SET is_default = #{isDefault} WHERE organization_code = #{orgCode}")
+    @Update("UPDATE team_project_auth SET is_default = #{isDefault} WHERE organization_code = #{orgCode}")
     Integer updateProjectAuthIsDefaultByOrgCode(Integer isDefault,String orgCode);
 }

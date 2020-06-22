@@ -8,7 +8,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@TableName("pear_project_report")
+@TableName("team_project_report")
 @Data
 @ToString
 @NoArgsConstructor

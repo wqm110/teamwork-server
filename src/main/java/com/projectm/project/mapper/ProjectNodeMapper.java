@@ -14,9 +14,9 @@ import java.util.Map;
 @Mapper
 public interface ProjectNodeMapper   extends BaseMapper<ProjectNode> {
 
-    @Select("SELECT * FROM pear_project_node A WHERE A.node LIKE CONCAT('%',#{node},'%') ")
+    @Select("SELECT * FROM team_project_node A WHERE A.node LIKE CONCAT('%',#{node},'%') ")
     List<Map> selectProjectNodeByNodeLike(String node);
 
-    @Select("SELECT * FROM pear_project_node")
+    @Select("SELECT * FROM team_project_node")
     List<Map> selectAllProjectNode();
 }

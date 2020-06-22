@@ -14,16 +14,16 @@ import java.util.Map;
 @Repository
 @Mapper
 public interface ProjectVersionMapper  extends BaseMapper<ProjectVersion> {
-    @Select("SELECT * FROM pear_project_version WHERE features_code = #{featuresCode} ORDER BY id ASC")
+    @Select("SELECT * FROM team_project_version WHERE features_code = #{featuresCode} ORDER BY id ASC")
     List<Map> selectProjectVersionByFeaturesCode(String featuresCode);
 
-    @Select("SELECT * FROM pear_project_version WHERE code = #{code} ")
+    @Select("SELECT * FROM team_project_version WHERE code = #{code} ")
     Map selectProjectVersionByCode(String code);
 
-    @Select("SELECT * FROM pear_project_version WHERE name = #{name} AND features_code = #{featuresCode} LIMIT 1")
+    @Select("SELECT * FROM team_project_version WHERE name = #{name} AND features_code = #{featuresCode} LIMIT 1")
     Map selectProjectVersionByNameAndFeaturesCode(String name,String featuresCode);
 
-    @Delete("DELETE FROM pear_project_version WHERE code = #{code}")
+    @Delete("DELETE FROM team_project_version WHERE code = #{code}")
     Integer deleteProjectVersionByCode(String code);
 
 }

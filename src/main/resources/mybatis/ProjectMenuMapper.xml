@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<select id="selectAllProjectMenu" resultMap="projectMenuResult" parameterType="java.util.Map">
-		SELECT a.* FROM pear_project_menu a where 1 = 1
+		SELECT a.* FROM team_project_menu a where 1 = 1
 		<if test="params.status != null and params.status != ''">
 			AND a.status = #{params.status}
 		</if>
@@ -32,7 +32,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectProjectMenuByPid" resultMap="projectMenuResult" parameterType="java.util.Map">
-		SELECT * FROM pear_project_menu a WHERE a.pid = #{params.pid}
+		SELECT * FROM team_project_menu a WHERE a.pid = #{params.pid}
 		<if test="params.status != null and params.status != ''">
 			AND a.status = #{params.status}
 		</if>
@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectAllNotBase" resultMap="projectMenuResult" parameterType="java.util.Map">
-		SELECT * FROM pear_project_menu a WHERE a.pid != 0
+		SELECT * FROM team_project_menu a WHERE a.pid != 0
 		<if test="params.status != null and params.status != ''">
 			AND a.status = #{params.status}
 		</if>

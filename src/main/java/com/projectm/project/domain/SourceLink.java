@@ -10,7 +10,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.Map;
 
-@TableName("pear_source_link")
+@TableName("team_source_link")
 @Data
 @ToString
 @NoArgsConstructor

@@ -16,13 +16,13 @@ import java.util.Map;
 public interface  TaskWorkTimeMapper  extends BaseMapper<TaskWorkTime> {
 
 
-    @Select("SELECT * FROM pear_task_work_time WHERE task_code = #{taskCode}")
+    @Select("SELECT * FROM team_task_work_time WHERE task_code = #{taskCode}")
     List<Map> selectTaskWorkTimeByTaskCode(String taskCode);
 
-    @Select("SELECT * FROM pear_task_work_time WHERE code = #{code}")
+    @Select("SELECT * FROM team_task_work_time WHERE code = #{code}")
     Map selectTaskWorkTimeByCode(String code);
 
-    @Update("DELETE FROM pear_task_work_time WHERE code = #{code}")
+    @Update("DELETE FROM team_task_work_time WHERE code = #{code}")
     Integer deleteTaskWorkTimeByCode(String code);
 
 }

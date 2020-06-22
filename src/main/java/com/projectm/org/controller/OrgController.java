@@ -5,9 +5,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.framework.common.AjaxResult;
 import com.framework.common.utils.ServletUtils;
 import com.framework.common.utils.StringUtils;
+import com.framework.utils.FileUtils;
 import com.projectm.common.CommUtils;
 import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
+import com.projectm.common.ExcelUtils;
+import com.projectm.config.MProjectConfig;
 import com.projectm.member.service.MemberService;
 import com.projectm.org.domain.Department;
 import com.projectm.org.domain.Organization;
@@ -16,10 +19,13 @@ import com.projectm.org.service.OrgService;
 import com.projectm.org.service.OrganizationService;
 import com.projectm.web.BaseController;
 import org.apache.commons.collections.MapUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.*;
 
 @RestController
@@ -167,5 +173,38 @@ public class OrgController   extends BaseController {
         return new AjaxResult(AjaxResult.Type.SUCCESS, "组织不存在",false);
     }
 
+    @GetMapping("/department_member/_downloadTemplate")
+    @ResponseBody
+    public void downloadTemplate(@RequestParam Map<String,Object> mmap)
+    {
+        try
+        {
+            String filePath = MProjectConfig.getDownloadPath() +"/template/importMember.xlsx";
+
+            ServletUtils.getResponse().setCharacterEncoding("utf-8");
+            ServletUtils.getResponse().setContentType("multipart/form-data");
+            ServletUtils.getResponse().setHeader("Content-Disposition",
+                    "attachment;fileName=" + FileUtils.setFileDownloadHeader(ServletUtils.getRequest(), "批量导入成员模板.xlsx"));
+            FileUtils.writeBytes(filePath, ServletUtils.getResponse().getOutputStream());
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+
+    @PostMapping("/department_member/uploadFile")
+    public AjaxResult uploadFile(@RequestParam Map<String,Object> mmap, MultipartFile file)throws Exception
+    {
+        InputStream ins = file.getInputStream();
+        Map loginMember = getLoginMember();
+        List<String> list = null;
+        String rst = "";
+        if(ins != null){
+             memberService.uploadFile(MapUtils.getString(loginMember,"organizationCode"),ins);
+        }
+        return AjaxResult.success();
+    }
 
 }

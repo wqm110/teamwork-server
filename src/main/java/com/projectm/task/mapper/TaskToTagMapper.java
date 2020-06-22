@@ -14,9 +14,9 @@ import java.util.Map;
 @Mapper
 public interface  TaskToTagMapper  extends BaseMapper<TaskToTag> {
 
-    @Select("SELECT * FROM pear_task_to_tag WHERE task_code = #{taskCode}")
+    @Select("SELECT * FROM team_task_to_tag WHERE task_code = #{taskCode}")
     List<Map> selectTaskToTagByTaskCode(String taskCode);
 
-    @Select("SELECT * FROM pear_task_to_tag WHERE tag_code = #{tagCode} AND task_code = #{taskCode} LIMIT 1")
+    @Select("SELECT * FROM team_task_to_tag WHERE tag_code = #{tagCode} AND task_code = #{taskCode} LIMIT 1")
     Map selectTaskToTagByTagCodeAndTaskCode(String tagCode,String taskCode);
 }

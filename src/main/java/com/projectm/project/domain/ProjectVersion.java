@@ -11,7 +11,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
-@TableName("pear_project_version")
+@TableName("team_project_version")
 @Data
 @ToString
 @NoArgsConstructor

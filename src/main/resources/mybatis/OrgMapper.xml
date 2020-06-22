@@ -5,14 +5,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.projectm.org.mapper.OrgMapper">
 
 	<select id="selectOrgByMemCode" resultType="java.util.Map" parameterType="java.util.Map">
-		SELECT * FROM pear_organization WHERE  code = #{params.memberCode} LIMIT 1
+		SELECT * FROM team_organization WHERE  code = #{params.memberCode} LIMIT 1
 	</select>
 
 	<select id="selectDepByMemCode" resultType="java.util.Map" parameterType="java.util.Map">
-		SELECT * FROM pear_department WHERE  code = #{params.memberCode} LIMIT 1
+		SELECT * FROM team_department WHERE  code = #{params.memberCode} LIMIT 1
 	</select>
 	<select id="_getOrgList" resultType="java.util.Map">
-		select * from pear_organization
+		select * from team_organization
 	</select>
 
 </mapper> 

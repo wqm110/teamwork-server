@@ -14,11 +14,11 @@ import java.util.Map;
 @Mapper
 public interface TaskStagesTempleteMapper  extends BaseMapper<TaskStagesTemplete> {
 
-    @Select("SELECT * FROM pear_task_stages_template WHERE project_template_code = #{projectTempleteCode} ")
+    @Select("SELECT * FROM team_task_stages_template WHERE project_template_code = #{projectTempleteCode} ")
     List<Integer> selectIdsByProjectTempleteCode(String projectTempleteCode);
-    @Select("SELECT * FROM pear_task_stages_template WHERE project_template_code = #{projectTempleteCode} ")
+    @Select("SELECT * FROM team_task_stages_template WHERE project_template_code = #{projectTempleteCode} ")
     List<Map> selectByProjectTempleteCode(String projectTempleteCode);
 
-    @Select("select * from pear_task_stages_template as pt where pt.code=#{code}")
+    @Select("select * from team_task_stages_template as pt where pt.code=#{code}")
     TaskStagesTemplete selectByCode(String code);
 }

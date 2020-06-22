@@ -1,12 +1,19 @@
 package com.projectm.member.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.framework.common.utils.StringUtils;
+import com.projectm.common.CommUtils;
+import com.projectm.common.DateUtil;
 import com.projectm.mapper.CommMapper;
 import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.mapper.MemberAccountMapper;
+import com.projectm.project.domain.ProjectAuth;
+import com.projectm.project.mapper.ProjectAuthMapper;
 import com.projectm.project.mapper.ProjectMapper;
+import com.projectm.project.service.ProjectAuthService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +64,7 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
         String keyword = MapUtils.getString(params, "keyword");
         String orgCode = MapUtils.getString(params, "orgCode");
         Integer searchType = MapUtils.getInteger(params, "searchType", -1);
-        String sql = " select * from pear_member_account a where 1=1 ";
+        String sql = " select * from team_member_account a where 1=1 ";
         if(StringUtils.isNotEmpty(keyword)){
             sql += " and a.name like '%"+keyword+"%' ";
         }
@@ -120,4 +127,36 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
         return baseMapper.selectMemberAccountByMemCode(memCode);
     }
 
+    @Autowired
+    MemberService memberService;
+    @Autowired
+    ProjectAuthMapper projectAuthMapper;
+
+    public void inviteMember(MemberAccount memberAccount){
+
+        LambdaQueryWrapper<MemberAccount> memberAccountWQ = new LambdaQueryWrapper<>();
+        memberAccountWQ.eq(MemberAccount::getMember_code,memberAccount.getMember_code());
+        memberAccountWQ.eq(MemberAccount::getOrganization_code,memberAccount.getOrganization_code());
+        MemberAccount searchMemberAccount =baseMapper.selectOne(memberAccountWQ);
+        if(ObjectUtils.isNotEmpty(searchMemberAccount) && ObjectUtils.isNotEmpty(searchMemberAccount.getId())){
+            return;
+        }
+        Map member = memberService.getMemberMapByCode(memberAccount.getMember_code());
+        if(MapUtils.isEmpty(member)){
+            return;
+        }
+
+        LambdaQueryWrapper<ProjectAuth> projectAuthWQ = new LambdaQueryWrapper<>();
+        projectAuthWQ.eq(ProjectAuth::getOrganization_code,memberAccount.getOrganization_code());
+        projectAuthWQ.eq(ProjectAuth::getIs_default,1);
+        ProjectAuth pa = projectAuthMapper.selectOne(projectAuthWQ);
+        if(ObjectUtils.isNotEmpty(pa)){
+            memberAccount.setAuthorize(String.valueOf(pa.getId()));
+        }
+        memberAccount.setCode(CommUtils.getUUID());
+        memberAccount.setIs_owner(0);
+        memberAccount.setStatus(1);
+        memberAccount.setCreate_time(DateUtil.getCurrentDateTime());
+        baseMapper.insert(memberAccount);
+    }
 }

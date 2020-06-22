@@ -51,7 +51,7 @@ public class ProjectTemplateService extends ServiceImpl<ProjectTemplateMapper, P
         String memberCode = MapUtils.getString(params,"memberCode");
         String orgCode = MapUtils.getString(params,"orgCode");
         Integer viewType = MapUtils.getInteger(params,"viewType",-1);
-        String sql = " select * from pear_project_template as pt ";
+        String sql = " select * from team_project_template as pt ";
         if(-1 == viewType){
             sql += String.format("  where pt.organization_code = '%s' or pt.is_system = 1",orgCode);
         }else if(1==viewType){
