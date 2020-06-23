@@ -1,8 +1,8 @@
 package com.projectm.login.service;
 
 import com.framework.common.AjaxResult;
-import com.framework.common.utils.IdUtils;
 
+import com.framework.common.utils.IdUtils;
 import com.framework.common.utils.ServletUtils;
 import com.projectm.common.Constant;
 import com.projectm.member.mapper.MemberMapper;
@@ -48,7 +48,7 @@ public class LoginService {
             put("tokenList",new HashMap(){{
                 put("accessTokenExp",(new Date()).getTime());
                 put("accessToken", IdUtils.randomUUID());
-                put("refreshToken",IdUtils.randomUUID());
+                put("refreshToken", IdUtils.randomUUID());
             }});
             put("organizationList",organizationMapper.selectOrganizationByCode(MapUtils.getString(member,"organization_code")));
         }});
