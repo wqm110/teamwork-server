@@ -1,4 +1,4 @@
-package com.projectm.member.domain;
+package com.projectm.org.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -8,18 +8,22 @@ import lombok.*;
 
 import java.io.Serializable;
 
-@TableName("team_project_member")
+@TableName("team_department_member")
 @Data
-@ToString
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectMember  extends BaseDomain implements Serializable {
+public class DepartmentMember extends BaseDomain implements Serializable {
+
     @TableId(type = IdType.AUTO)
     private Integer id;
-    private String project_code;
-    private String member_code;
+    private String code;
+    private String department_code;
+    private String organization_code;
+    private String account_code;
     private String join_time;
+    private Integer is_principal;
     private Integer is_owner;
     private String authorize;
 }

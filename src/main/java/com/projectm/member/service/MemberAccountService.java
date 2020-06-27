@@ -76,7 +76,7 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
             sql += " and a.status=0 ";
         }else if(4==searchType){
             sql += "  and a.status=1 ";
-            sql += " and a.department_code like '%"+memberCode+"%' ";
+            sql += " and a.department_code like '%"+departmentCode+"%' ";
         }else{
             sql += "  and a.status=1 ";
         }
@@ -132,20 +132,19 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
     @Autowired
     ProjectAuthMapper projectAuthMapper;
 
-    public void inviteMember(MemberAccount memberAccount){
+    public MemberAccount inviteMember(MemberAccount memberAccount){
 
         LambdaQueryWrapper<MemberAccount> memberAccountWQ = new LambdaQueryWrapper<>();
         memberAccountWQ.eq(MemberAccount::getMember_code,memberAccount.getMember_code());
         memberAccountWQ.eq(MemberAccount::getOrganization_code,memberAccount.getOrganization_code());
         MemberAccount searchMemberAccount =baseMapper.selectOne(memberAccountWQ);
         if(ObjectUtils.isNotEmpty(searchMemberAccount) && ObjectUtils.isNotEmpty(searchMemberAccount.getId())){
-            return;
+            return null;
         }
         Map member = memberService.getMemberMapByCode(memberAccount.getMember_code());
         if(MapUtils.isEmpty(member)){
-            return;
+            return null;
         }
-
         LambdaQueryWrapper<ProjectAuth> projectAuthWQ = new LambdaQueryWrapper<>();
         projectAuthWQ.eq(ProjectAuth::getOrganization_code,memberAccount.getOrganization_code());
         projectAuthWQ.eq(ProjectAuth::getIs_default,1);
@@ -157,6 +156,9 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
         memberAccount.setIs_owner(0);
         memberAccount.setStatus(1);
         memberAccount.setCreate_time(DateUtil.getCurrentDateTime());
+        memberAccount.setName(MapUtils.getString(member,"name"));
+        memberAccount.setEmail(MapUtils.getString(member,"email"));
         baseMapper.insert(memberAccount);
+        return memberAccount;
     }
 }

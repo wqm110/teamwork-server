@@ -17,8 +17,11 @@ import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.mapper.MemberAccountMapper;
 import com.projectm.member.mapper.MemberMapper;
 import com.projectm.member.mapper.ProjectMemberMapper;
+import com.projectm.org.domain.Department;
 import com.projectm.org.domain.Organization;
 import com.projectm.org.mapper.OrganizationMapper;
+import com.projectm.org.service.DepartmentMemberService;
+import com.projectm.org.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,63 +100,7 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
 
 
 
-    @Transactional
-    public void uploadFile(String orgCode, InputStream ins) {
-        int dataStartRow = 4;
-        Excel07SaxReader reader = new Excel07SaxReader(createRowHandler(dataStartRow,orgCode));
-        reader.read(ins,0);
-    }
     @Autowired
-    MemberAccountService memberAccountService;
-
-    private RowHandler createRowHandler(int dataStartRow,String orgCode) {
-        return new RowHandler() {
-            @Override
-            public void handle(int sheetIndex, int rowIndex, List<Object> rowlist) {
-                if(rowIndex>=dataStartRow-1){
-                    Member member = new Member();
-                    member.setName(ListUtils.getValue(rowlist,0,String.class));
-                    member.setEmail(ListUtils.getValue(rowlist,1,String.class));
-                    if(StringUtils.isEmpty(member.getName())||StringUtils.isEmpty(member.getEmail())){
-                        return;
-                    }
-                    LambdaQueryWrapper<Member> memberWQ = new LambdaQueryWrapper<>();
-                    memberWQ.eq(Member::getEmail,member.getEmail());
-                    member = baseMapper.selectOne(memberWQ);
-                    if(ObjectUtils.isEmpty(member)){
-                        member = new Member();
-                        member.setName(ListUtils.getValue(rowlist,0,String.class));
-                        member.setEmail(ListUtils.getValue(rowlist,1,String.class));
-                        member.setDepartment(ListUtils.getValue(rowlist,2,String.class));
-                        member.setPosition(ListUtils.getValue(rowlist,3,String.class));
-                        member.setMobile(ListUtils.getValue(rowlist,4,String.class));
-                        member.setPassword(ListUtils.getValue(rowlist,5,String.class));
-                        member.setDescription(ListUtils.getValue(rowlist,6,String.class));
-                        member.setCode(CommUtils.getUUID());
-                        member.setPassword(Md5Utils.hash(member.getPassword()));
-                        member.setAvatar("https://static.vilson.online/cover.png");
-                        member.setAccount(member.getName());
-
-                        baseMapper.insert(member);
-                        MemberAccount memberAccount = new MemberAccount();
-                        memberAccount.setMember_code(member.getCode());
-                        memberAccount.setOrganization_code(orgCode);
-                        memberAccount.setPosition(member.getPosition());
-                        memberAccount.setMobile(member.getMobile());
-                        memberAccount.setDescription(member.getDescription());
-                        memberAccountService.inviteMember(memberAccount);
-                    }else{
-
-                        LambdaQueryWrapper<MemberAccount> memberAcWQ = new LambdaQueryWrapper<>();
-                        memberAcWQ.eq(MemberAccount::getMember_code,member.getCode());
-                        memberAcWQ.eq(MemberAccount::getOrganization_code,orgCode);
-                        MemberAccount ma = memberAccountService.getOne(memberAcWQ);
-                    }
-
-                }
-            }
-        };
-    }
-
+    DepartmentMemberService departmentMemberService;
 
 }

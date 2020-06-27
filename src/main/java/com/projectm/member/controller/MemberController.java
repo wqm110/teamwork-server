@@ -16,7 +16,9 @@ import com.projectm.member.service.MemberAccountService;
 import com.projectm.member.service.MemberService;
 import com.projectm.member.service.ProjectMemberService;
 import com.projectm.org.service.DepartmentService;
+import com.projectm.project.domain.Project;
 import com.projectm.project.service.ProjectAuthService;
+import com.projectm.project.service.ProjectService;
 import com.projectm.task.domain.Task;
 import com.projectm.task.service.TaskService;
 import com.projectm.web.BaseController;
@@ -51,6 +53,9 @@ public class MemberController  extends BaseController {
 
     @Autowired
     private DepartmentService departmentService;
+
+    @Autowired
+    private ProjectService projectService;
 
     /**
      * 账号停用
@@ -205,8 +210,8 @@ public class MemberController  extends BaseController {
         Map memberAccountMap= memberAccountService.getMemberAccountByCode(code);
         String[] depCodeArr ,authorizeArr= null;
         Map depMap = null;
-        String  depCodes = MapUtils.getString(memberAccountMap,"department_code");
-        String authorize = MapUtils.getString(memberAccountMap,"authorize");
+        String  depCodes = MapUtils.getString(memberAccountMap,"department_code","");
+        String authorize = MapUtils.getString(memberAccountMap,"authorize","");
         depCodeArr = depCodes.split(",");
         authorizeArr = authorize.split(",");
         Integer status = MapUtils.getInteger(memberAccountMap,"status",-1);
@@ -443,5 +448,45 @@ public class MemberController  extends BaseController {
             return AjaxResult.success(Constant.createPageResultMap(lrt,idata.getTotal(),idata.getCurrent()));
         }
         return AjaxResult.success(new HashMap<>());
+    }
+
+    @PostMapping("/project_member/inviteMember")
+    @ResponseBody
+    public AjaxResult inviteMember(@RequestParam Map<String,Object> mmap)
+    {
+        String memberCode = MapUtils.getString(mmap,"memberCode");
+        String projectCode = MapUtils.getString(mmap,"projectCode");
+        if(StringUtils.isEmpty(memberCode) || StringUtils.isEmpty(projectCode)){
+            return AjaxResult.warn("数据异常！");
+        }
+        Project project = projectService.getProjectByCodeNotDel(projectCode);
+        if(ObjectUtils.isEmpty(project)){
+            return AjaxResult.warn("该项目已失效！");
+        }
+        boolean bo = projectMemberService.isProjectMember(projectCode,memberCode);
+        if(bo){
+            return AjaxResult.success();
+        }
+        return AjaxResult.success(projectMemberService.inviteMember(memberCode,project,0));
+    }
+    @PostMapping("/project_member/removeMember")
+    @ResponseBody
+    public AjaxResult removeMember(@RequestParam Map<String,Object> mmap)
+    {
+        String memberCode = MapUtils.getString(mmap,"memberCode");
+        String projectCode = MapUtils.getString(mmap,"projectCode");
+        if(StringUtils.isEmpty(memberCode) || StringUtils.isEmpty(projectCode)){
+            return AjaxResult.warn("数据异常！");
+        }
+        Project project = projectService.getProjectByCodeNotDel(projectCode);
+        if(ObjectUtils.isEmpty(project)){
+            return AjaxResult.warn("该项目已失效！");
+        }
+        boolean bo = projectMemberService.isProjectMember(projectCode,memberCode);
+        if(!bo){
+            return AjaxResult.success();
+        }
+        return AjaxResult.success(projectMemberService.removeMember(memberCode,project));
+
     }
 }

@@ -19,6 +19,10 @@ public interface TaskMapper extends BaseMapper<Task> {
 
     @Select("SELECT * FROM team_task WHERE code = #{code} LIMIT 1")
     Map selectTaskByCode(String code);
+    @Select("SELECT * FROM team_task WHERE code = #{code} and deleted= 0 LIMIT 1")
+    Map selectTaskByCodeNoDel(String code);
+    @Select("SELECT * FROM team_task WHERE code = #{code} and deleted= 1 LIMIT 1")
+    Map selectTaskByCodeDel(String code);
     @Select("SELECT a.id,a.code,a.project_code,a.name,a.pri,a.execute_status,a.description,a.create_by,a.create_time,a.assign_to,a.deleted,a.stage_code,a.task_tag,a.done,a.begin_time,a.end_time,a.remind_time,a.pcode,a.sort,a.liked,a.star,a.deleted_time,a.private,a.id_num,a.path,a.schedule,a.version_code,a.features_code,a.work_time,a.status FROM team_task a WHERE a.code = #{code} ")
     Task selTaskByCode(String code);
 
@@ -69,7 +73,7 @@ public interface TaskMapper extends BaseMapper<Task> {
 
     @Select({"<script>",
             "select t.project_code,t.assign_to,t.deleted,t.stage_code,t.task_tag,t.done,t.begin_time,t.end_time,t.remind_time," +
-                    "t.pcode,t.sort,t.`liked`,t.star,t.deleted_time,t.private,t.id_num,t.path,t.`schedule`,t.version_code," +
+                    "t.pcode,t.sort,t.`liked`,t.star,t.deleted_time,t.pri,t.private,t.id_num,t.path,t.`schedule`,t.version_code," +
                     "t.features_code,t.work_time,p.cover,p.access_control_type,p.white_list,p.`order`," +
                     "p.template_code,p.organization_code,p.prefix,p.open_prefix,p.archive,p.archive_time," +
                     "p.open_begin_time,p.open_task_private,p.task_board_theme,p.auto_update_schedule," +
@@ -103,5 +107,15 @@ public interface TaskMapper extends BaseMapper<Task> {
 
     @Select("SELECT  id,code,project_code,name,pri,execute_status,description,create_by,create_time,assign_to,deleted,stage_code,task_tag,done,begin_time,end_time,remind_time,pcode,sort,`liked`,star,deleted_time,private,id_num,path,schedule,version_code,features_code,work_time,status  FROM team_task     WHERE project_code = #{projectCode} AND deleted = #{deleted}")
     List<Map> selectTaskByProjectCodeAndDel(String projectCode,Integer deleted);
+
+    @Update("UPDATE team_task SET `like` = #{like}  WHERE code = #{code}")
+    Integer updateTaskLike(Integer like,String code);
+    @Update("UPDATE team_task SET `star` = #{star}  WHERE code = #{code}")
+    Integer updateTaskStar(Integer star,String code);
+
+    @Select("select count(1) from team_task where project_code=#{projectCode}")
+    Integer selectCountByProjectCode(String projectCode);
+    @Select("select count(1) from team_task where project_code=#{projectCode} and done = 1 ")
+    Integer selectCountByProjectCodeAndDone(String projectCode);
 
 }

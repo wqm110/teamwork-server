@@ -17,8 +17,8 @@ import java.util.Map;
 public class ProjectMenuService extends ServiceImpl<ProjectMenuMapper, ProjectMenu> {
 
     public List<ProjectMenu> getCurrentUserMenu(){
-        Map member = (Map)ServletUtils.getRequest().getSession().getAttribute(Constant.CURRENT_USER);
-        List nodes = (List)member.get(Constant.NODES);
+//        Map member = (Map)ServletUtils.getRequest().getSession().getAttribute(Constant.CURRENT_USER);
+//        List nodes = (List)member.get(Constant.NODES);
         List<ProjectMenu> lstMenu = baseMapper.selectAllProjectMenu(new HashMap(){{put("status",1);}});
         MenuUtils mu = new MenuUtils(lstMenu);
         return mu.builTree();

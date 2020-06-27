@@ -1,8 +1,10 @@
 package com.framework.common.exception;
 
+import com.framework.common.ResultCode;
+
 /**
  * 自定义异常
- * 
+ *
  * @author ruoyi
  */
 public class CustomException extends RuntimeException
@@ -28,6 +30,11 @@ public class CustomException extends RuntimeException
     {
         super(message, e);
         this.message = message;
+    }
+
+    public CustomException(ResultCode resultCode){
+        this.message = resultCode.getMsg();
+        this.code = resultCode.getCode();
     }
 
     @Override

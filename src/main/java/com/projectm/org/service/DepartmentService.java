@@ -1,5 +1,6 @@
 package com.projectm.org.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.projectm.org.domain.Department;
@@ -30,6 +31,14 @@ public class DepartmentService  extends ServiceImpl<DepartmentMapper, Department
             result += baseMapper.deleteDepartmentByCode(code);
         }
         return result;
+    }
+
+    public Department getDept(String deptName,String pcode,String orgCode){
+        LambdaQueryWrapper<Department> depQW = new LambdaQueryWrapper<Department>();
+        depQW.eq(Department::getName,deptName);
+        depQW.eq(Department::getPcode,pcode);
+        depQW.eq(Department::getOrganization_code,orgCode);
+        return baseMapper.selectOne(depQW);
     }
 
 }

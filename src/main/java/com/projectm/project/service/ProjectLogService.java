@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.framework.common.utils.StringUtils;
 import com.projectm.common.CommUtils;
+import com.projectm.common.DateUtil;
 import com.projectm.common.DateUtils;
 import com.projectm.member.domain.Member;
 import com.projectm.member.service.MemberService;
@@ -31,7 +32,7 @@ public class ProjectLogService   extends ServiceImpl<ProjectLogMapper, ProjectLo
 
     public Project run(Map param){
         ProjectLog projectLog = ProjectLog.builder().action_type("project").code(CommUtils.getUUID())
-                .create_time(DateUtils.dateTimeNow()).to_member_code(MapUtils.getString(param,"to_member_code"))
+                .create_time(DateUtil.getCurrentDateTime()).to_member_code(MapUtils.getString(param,"to_member_code"))
                 .is_comment(MapUtils.getInteger(param,"is_comment")).content(MapUtils.getString(param,"content",""))
                 .type(MapUtils.getString(param,"type")).source_code(MapUtils.getString(param,"source_code"))
                 .member_code(MapUtils.getString(param,"member_code")).build();

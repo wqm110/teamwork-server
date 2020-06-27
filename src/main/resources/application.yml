@@ -23,9 +23,9 @@ mproject:
 server:
   # 服务器的HTTP端口，默认为80
   port: 8888
-  servlet:
-    # 应用的访问路径
-    context-path: /api/
+  #  servlet:
+  #    # 应用的访问路径
+  #    context-path: /api/
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -33,7 +33,7 @@ server:
     max-threads: 800
     # Tomcat启动初始化的线程数，默认值25
     min-spare-threads: 30
- 
+
 # 日志配置
 logging:
   level:
@@ -61,15 +61,15 @@ spring:
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
-  profiles: 
+  profiles:
     active: druid
   # 文件上传
   servlet:
-     multipart:
-       # 单个文件大小
-       max-file-size:  10MB
-       # 设置总上传的文件大小
-       max-request-size:  20MB
+    multipart:
+      # 单个文件大小
+      max-file-size:  10MB
+      # 设置总上传的文件大小
+      max-request-size:  20MB
   # 服务模块
   devtools:
     restart:
@@ -78,16 +78,36 @@ spring:
 
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
       url: jdbc:mysql://192.168.2.28:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
       username: root
       #password: 123456
       password: P@ssWord8.0
+  #Redis
+  redis:
+    # 地址
+    host: 192.168.2.28
+    # 端口，默认为6379
+    port: 6379
+    # 密码
+    password:
+    # 连接超时时间
+    timeout: 10s
+    lettuce:
+      pool:
+        # 连接池中的最小空闲连接
+        min-idle: 0
+        # 连接池中的最大空闲连接
+        max-idle: 8
+        # 连接池的最大数据库连接数
+        max-active: 8
+        # #连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1ms
 
 
-# MyBatis
-#mybatis:
+    # MyBatis
+    #mybatis:
     # 搜索指定包别名
     #typeAliasesPackage: com.ruoyi.**.domain
     # 配置mapper的扫描，找到所有的mapper.xml映射文件
@@ -96,8 +116,10 @@ spring:
     #configLocation: classpath:mybatis/mybatis-config.xml
 
 mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
   mapper-locations: classpath:mybatis/**/*Mapper.xml
-  config-location: classpath:mybatis/mybatis-config.xml
   type-aliases-package: com.mproject.*.**.domain
   global-config:
     refresh: true # 刷新xml文件
@@ -123,7 +145,7 @@ shiro:
     captchaType: math
   cookie:
     # 设置Cookie的域名 默认空，即当前访问的域名
-    domain: 
+    domain:
     # 设置cookie的有效访问路径
     path: /
     # 设置HttpOnly属性
@@ -143,7 +165,7 @@ shiro:
     kickoutAfter: false
 
 # 防止XSS攻击
-xss: 
+xss:
   # 过滤开关
   enabled: true
   # 排除链接（多个用逗号分隔）
@@ -155,6 +177,6 @@ xss:
 jwt:
   header: Authorization
   secret: mySecret
-  #token有效期一天
-  expiration: 86400
+  #token有效期时间（分钟）
+  expiration: 120
   tokenHead: "Bearer "

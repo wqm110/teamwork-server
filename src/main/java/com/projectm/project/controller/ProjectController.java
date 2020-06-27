@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.framework.common.AjaxResult;
 import com.framework.common.utils.StringUtils;
+import com.framework.security.util.UserUtil;
 import com.projectm.common.*;
 import com.projectm.config.MProjectConfig;
+import com.projectm.login.entity.LoginUser;
 import com.projectm.member.domain.Member;
 import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.service.MemberAccountService;
@@ -456,6 +458,7 @@ public class ProjectController extends BaseController {
     @ResponseBody
     public AjaxResult projectSelfList(@RequestParam Map<String,Object> mmap)
     {
+        LoginUser loginUser = UserUtil.getLoginUser();
         Map loginMember = getLoginMember();
         Integer archive = MapUtils.getInteger(mmap,"archive",-1);
         Integer type =  MapUtils.getInteger(mmap,"type",0);

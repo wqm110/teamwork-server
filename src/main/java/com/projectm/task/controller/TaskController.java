@@ -80,6 +80,7 @@ public class TaskController  extends BaseController {
         Map loginMember = getLoginMember();
         Integer type = MapUtils.getInteger(mmap,"type",0);
 
+
         Integer done = type;
         if(type == 0) done = 0;
         if(type ==-1) done = type;
@@ -95,6 +96,11 @@ public class TaskController  extends BaseController {
         if(page != null){
             List<Map> list = page.getRecords();
             List<Map> resultList = new ArrayList<>();
+            Map statusMap = new HashMap(){{
+                put(0,"普通");
+                put(1,"紧急");
+                put(2,"非常紧急");
+            }};
             if(CollectionUtils.isNotEmpty(list)){
                 Map memberMap,projectMap = null;
                 for(Map m:list){
@@ -102,6 +108,7 @@ public class TaskController  extends BaseController {
                     projectMap = projectService.getProjectByCode(MapUtils.getString(m,"project_code"));
                     m.put("executor",CommUtils.getMapField(memberMap,new String[]{"name","avatar"}));
                     m.put("projectInfo",CommUtils.getMapField(projectMap,new String[]{"name","code"}));
+                    m.put("priText",statusMap.get(MapUtils.getInteger(m,"pri",0)));
                     resultList.add(m);
                 }
             }
@@ -785,5 +792,79 @@ public class TaskController  extends BaseController {
         String projectCode = MapUtils.getString(mmap,"projectCode");
         List<Map> listResult = taskWorkflowService.selectTaskWorkflowByProjectCode(projectCode);
         return AjaxResult.success(listResult);
+    }
+
+    @PostMapping("/task/like")
+    @ResponseBody
+    public AjaxResult like(@RequestParam Map<String,Object> mmap)  throws Exception {
+        Integer data = MapUtils.getInteger(mmap,"like");
+        String code = MapUtils.getString(mmap,"taskCode");
+        if(StringUtils.isEmpty(code)){
+            return AjaxResult.warn("请选择一个任务！");
+        }
+        Map taskMap = taskService.getTaskMapByCode(code);
+        if(MapUtils.isEmpty(taskMap)){
+            return AjaxResult.warn("该任务已失效！");
+        }
+        Map taskMapNoDel = taskService.getTaskByCodeNoDel(code);
+        if(MapUtils.isEmpty(taskMapNoDel)){
+            return AjaxResult.warn("该任务在回收站中不能点赞！");
+        }
+        taskService.like(taskMap,MapUtils.getString(getLoginMember(),"memberCode"),data);
+        return AjaxResult.success();
+    }
+    @PostMapping("/task/star")
+    @ResponseBody
+    public AjaxResult star(@RequestParam Map<String,Object> mmap)  throws Exception {
+        Integer data = MapUtils.getInteger(mmap,"star");
+        String code = MapUtils.getString(mmap,"taskCode");
+        if(StringUtils.isEmpty(code)){
+            return AjaxResult.warn("请选择一个任务！");
+        }
+        Map taskMap = taskService.getTaskMapByCode(code);
+        if(MapUtils.isEmpty(taskMap)){
+            return AjaxResult.warn("该任务已失效！");
+        }
+        Map taskMapNoDel = taskService.getTaskByCodeNoDel(code);
+        if(MapUtils.isEmpty(taskMapNoDel)){
+            return AjaxResult.warn("该任务在回收站中不能收藏！");
+        }
+        taskService.star(taskMap,MapUtils.getString(getLoginMember(),"memberCode"),data);
+        return AjaxResult.success();
+    }
+    @PostMapping("/task/setPrivate")
+    @ResponseBody
+    public AjaxResult setPrivate(@RequestParam Map<String,Object> mmap)  throws Exception {
+        Integer private_=MapUtils.getInteger(mmap,"private");
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        if( 0==private_ || 1==private_){
+            Task task = taskService.getTaskByCode(taskCode);
+            taskService.edit(Task.builder().id(task.getId()).code(taskCode).project_code(task.getProject_code())
+                    .privated(private_).build(),MapUtils.getString(getLoginMember(),"memberCode"));
+        }
+        return  AjaxResult.success();
+    }
+    @PostMapping("/task/recycle")
+    @ResponseBody
+    public AjaxResult recycle(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        taskService.recycle(taskCode,MapUtils.getString(getLoginMember(),"memberCode"));
+        return  AjaxResult.success();
+    }
+
+    @PostMapping("/task/taskDone")
+    @ResponseBody
+    public AjaxResult taskDone(@RequestParam Map<String,Object> mmap)  throws Exception {
+        String taskCode = MapUtils.getString(mmap,"taskCode");
+        if(StringUtils.isEmpty(taskCode)){
+            return AjaxResult.warn("请选择任务");
+        }
+        Integer done =  MapUtils.getInteger(mmap,"done");
+        try{
+            taskService.taskDone(taskCode,done,MapUtils.getString(getLoginMember(),"memberCode"));
+        }catch (Exception e){e.printStackTrace();
+            return AjaxResult.warn(e.getMessage());
+        }
+        return AjaxResult.success();
     }
 }

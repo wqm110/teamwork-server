@@ -98,6 +98,7 @@ public class ServletUtils
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);
+            return null;
         }
         catch (IOException e)
         {

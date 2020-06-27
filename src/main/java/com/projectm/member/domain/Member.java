@@ -52,5 +52,7 @@ public class Member  extends BaseDomain implements Serializable {
     private String department;
     @TableField(exist = false)
     private List<String> nodes;
+    @TableField(exist = false)
+    private List<MemberAccount> memberAccountList;
 
 }

@@ -14,6 +14,7 @@ import com.projectm.config.MProjectConfig;
 import com.projectm.member.service.MemberService;
 import com.projectm.org.domain.Department;
 import com.projectm.org.domain.Organization;
+import com.projectm.org.service.DepartmentMemberService;
 import com.projectm.org.service.DepartmentService;
 import com.projectm.org.service.OrgService;
 import com.projectm.org.service.OrganizationService;
@@ -43,6 +44,8 @@ public class OrgController   extends BaseController {
 
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private DepartmentMemberService departmentMemberService;
 
     /**
      * 新增保存部门
@@ -202,7 +205,7 @@ public class OrgController   extends BaseController {
         List<String> list = null;
         String rst = "";
         if(ins != null){
-             memberService.uploadFile(MapUtils.getString(loginMember,"organizationCode"),ins);
+            departmentMemberService.uploadFile(MapUtils.getString(loginMember,"organizationCode"),ins);
         }
         return AjaxResult.success();
     }

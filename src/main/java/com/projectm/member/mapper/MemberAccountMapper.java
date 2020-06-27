@@ -3,10 +3,7 @@ package com.projectm.member.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.projectm.member.domain.MemberAccount;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,6 +38,9 @@ public interface MemberAccountMapper extends BaseMapper<MemberAccount> {
 
     @Delete("DELETE FROM team_department_member WHERE account_code = #{accCode} AND organization_code = #{orgCode}")
     Integer deleteDepartmentMemberByAccCodeAndOrgCode(String accCode,String orgCode);
+
+    @Update("update team_member_account a set a.department_code=#{departCodes}  WHERE a.code = #{code}")
+    Integer updateDepartCodeByCode(String departCodes,String code);
 
 
 }

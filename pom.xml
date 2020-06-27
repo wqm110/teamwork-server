@@ -34,15 +34,37 @@
         <poi.version>4.1.2</poi.version>
         <oshi.version>3.9.1</oshi.version>
         <jwt.version>0.9.0</jwt.version>
+        <redis.version>2.2.6.RELEASE</redis.version>
+        <security.version>2.2.6.RELEASE</security.version>
+        <jwt.version>3.10.0</jwt.version>
+        <commons-pool2.version>2.6.0</commons-pool2.version>
     </properties>
 
     <dependencies>
 
-        <!--<dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus</artifactId>
-            <version>3.3.1.tmp</version>
-        </dependency>-->
+        <!-- spring security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${security.version}</version>
+        </dependency>
+        <!-- redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>${redis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>${commons-pool2.version}</version>
+        </dependency>
+        <!-- jwt 工具类 -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
@@ -114,17 +136,17 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <!--Token生成与解析-->
-        <dependency>
+        <!--<dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jwt.version}</version>
-        </dependency>
+        </dependency>-->
         <!-- SpringBoot集成mybatis框架 -->
-        <dependency>
+        <!--<dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis.spring.boot.starter.version}</version>
-        </dependency>
+        </dependency>-->
 
         <!--阿里数据库连接池 -->
         <dependency>

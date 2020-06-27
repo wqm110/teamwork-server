@@ -1,10 +1,8 @@
 package com.framework.common.constant;
 
-import io.jsonwebtoken.Claims;
-
 /**
  * 通用常量信息
- * 
+ *
  * @author ruoyi
  */
 public class Constants
@@ -13,7 +11,7 @@ public class Constants
      * UTF-8 字符集
      */
     public static final String UTF8 = "UTF-8";
-    
+
     /**
      * 通用成功标识
      */
@@ -57,7 +55,12 @@ public class Constants
     /**
      * 令牌
      */
-    public static final String TOKEN = "token";
+    public static final String ORGCODE = "organizationcode";
+
+    /**
+     * 令牌
+     */
+    public static final String TOKEN = "Authorization";
 
     /**
      * 令牌前缀
@@ -73,11 +76,6 @@ public class Constants
      * 用户ID
      */
     public static final String JWT_USERID = "userid";
-
-    /**
-     * 用户名称
-     */
-    public static final String JWT_USERNAME = Claims.SUBJECT;
 
     /**
      * 用户头像
