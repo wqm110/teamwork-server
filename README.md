@@ -1,7 +1,7 @@
 # mk-teamwork-server
 
 #### 介绍
-mk-teamwork是任务协同项目管理系统，
+mk-teamwork是任务协同项目管理系统，是在pear project 基础上的JAVA 实现 ，目前项目完成了主要流程，后续会继续完善 ，打造一个实用的协同工作平台。
 
 #### 软件架构
 JAVA 1.8
