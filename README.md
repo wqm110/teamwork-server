@@ -34,7 +34,7 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142654_6a430b66_132459.png "2.png")
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142743_59e7e773_132459.png "1.png")
 
-#### 参与贡献
+#### 特此鸣谢
 
 1.  感谢vilson，本项目是pearProject的JAVA版本，后续会保持与pearProject同步，继续完善
 2.  pearProject 地址：https://gitee.com/vilson/vue-projectManage
