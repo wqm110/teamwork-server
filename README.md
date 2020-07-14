@@ -44,7 +44,7 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 1、欢迎大家使用，目前版本，可学习，可商用。
 
-2、技术交流群（仅技术交流）： ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142005_c8b96308_132459.png "mk-teamwork群二维码.png")      
+2、技术交流群（仅技术交流）：855354961
 
 
 #### 鼓励一下
