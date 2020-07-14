@@ -28,6 +28,10 @@ admin/1
 my.cnf位于etc文件夹下，vim下光标移到最后，添加如下：
 
 sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+#### 系统截图
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142642_ba78ff2a_132459.png "11.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142654_6a430b66_132459.png "2.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142743_59e7e773_132459.png "1.png")
 
 #### 参与贡献
 
@@ -39,4 +43,4 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 1、欢迎大家使用，目前版本，可学习，可商用。
 
-2、技术交流群（仅技术交流）：       
+2、技术交流群（仅技术交流）： ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142005_c8b96308_132459.png "mk-teamwork群二维码.png")      
