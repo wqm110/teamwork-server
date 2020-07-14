@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.projectm.project.domain.ProjectFeatures;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
@@ -16,14 +17,14 @@ import java.util.Map;
 public interface ProjectFeaturesMapper  extends BaseMapper<ProjectFeatures> {
 
     @Select("SELECT * FROM team_project_features WHERE project_code = #{projectCode} ORDER BY id DESC")
-    List<Map> selectProjectFeaturesByProjectCode(String projectCode);
+    List<Map> selectProjectFeaturesByProjectCode(@Param("projectCode") String projectCode);
 
     @Select("SELECT * FROM team_project_features WHERE code = #{code} ")
-    Map selectProjectFeaturesByCode(String code);
+    Map selectProjectFeaturesByCode(@Param("code") String code);
 
     @Select("SELECT * FROM team_project_features WHERE name = #{name} AND project_code = #{projectCode} LIMIT 1 ")
-    Map selectProjectFeaturesOneByNameAndProjectCode(String name,String projectCode);
+    Map selectProjectFeaturesOneByNameAndProjectCode(@Param("name") String name,@Param("projectCode") String projectCode);
 
     @Delete("DELETE FROM team_project_features WHERE code = #{code}")
-    Integer deleteProjectFeaturesByCode(String code);
+    Integer deleteProjectFeaturesByCode(@Param("code") String code);
 }

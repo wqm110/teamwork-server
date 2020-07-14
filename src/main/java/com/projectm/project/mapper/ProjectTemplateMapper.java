@@ -25,7 +25,7 @@ public interface ProjectTemplateMapper extends BaseMapper<ProjectTemplate> {
     IPage<Map> getProTemplateByOrgCode(IPage<Map> iPage, @Param("params") Map params);
 
     @Select("SELECT * FROM team_project_template A WHERE A.code = #{code} ")
-    Map getProjectTemplateByCode(String code);
+    Map getProjectTemplateByCode(@Param("code") String code);
 }
 
 

@@ -13,6 +13,6 @@ import java.util.Map;
 @Mapper
 public interface CommMapper {
     List<Map> customQueryItem(@Param("sqlContent") String sqlContent);
-    Map customQueryItemOne(String sqlContent);
-    IPage<Map> customQueryItem(IPage<Map> page, String sqlContent);
+    Map customQueryItemOne(@Param("sqlContent") String sqlContent);
+    IPage<Map> customQueryItem(IPage<Map> page, @Param("sqlContent") String sqlContent);
 }

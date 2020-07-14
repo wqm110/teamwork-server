@@ -237,7 +237,7 @@ CREATE TABLE `team_member`  (
 -- ----------------------------
 -- Records of team_member
 -- ----------------------------
-INSERT INTO `team_member` VALUES (582, 'panliye', '14e1b600b1fd579f47433b88e8d85291', '潘利业', '18681140825', 'juli', NULL, 1, '2020-06-20 17:24:48', '', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '', 0, 0, 0, NULL, '', '123@qq.com', '6v7be19pwman2fird04gqu53', NULL, NULL, NULL);
+INSERT INTO `team_member` VALUES (582, 'admin', '14e1b600b1fd579f47433b88e8d85291', 'admin', '18681140825', 'juli', NULL, 1, '2020-06-20 17:24:48', '', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '', 0, 0, 0, NULL, '', '123@qq.com', '6v7be19pwman2fird04gqu53', NULL, NULL, NULL);
 INSERT INTO `team_member` VALUES (646, 'zhangyi', '14e1b600b1fd579f47433b88e8d85291', '张一', '13399944031', NULL, '2020-07-06 10:50:59', 1, NULL, '', 'http://120.27.62.173:8888/common/image?filePathName=/defaultimg/user.jpg', NULL, 0, 0, 0, NULL, '', '322323@qq.com', 'bddc79203627409e9928b290b952ee88', NULL, NULL, NULL);
 INSERT INTO `team_member` VALUES (647, 'wangwei', '14e1b600b1fd579f47433b88e8d85291', '王伟', '13399944032', NULL, '2020-07-06 10:51:00', 1, NULL, '', 'http://120.27.62.173:8888/common/image?filePathName=/defaultimg/user.jpg', NULL, 0, 0, 0, NULL, '', '3332324@qq.com', '6d44c444965349ae926cd5be98912292', NULL, NULL, NULL);
 INSERT INTO `team_member` VALUES (648, 'lichao', '14e1b600b1fd579f47433b88e8d85291', '李超', '13399944033', NULL, '2020-07-06 10:51:01', 1, NULL, '', 'http://120.27.62.173:8888/common/image?filePathName=/defaultimg/user.jpg', NULL, 0, 0, 0, NULL, '', '4422325@qq.com', 'e9b4bbe96f04474599c9f014ea1f47e7', NULL, NULL, NULL);
@@ -276,7 +276,7 @@ CREATE TABLE `team_member_account`  (
 -- ----------------------------
 -- Records of team_member_account
 -- ----------------------------
-INSERT INTO `team_member_account` VALUES (21, '6v7be19pwman2fird04gqu11', '6v7be19pwman2fird04gqu53', '6v7be19pwman2fird04gqu53', 'axr73ydzo5gemks0pl9qnt16', '3', 1, '潘利业', '18681140825', '545522390@qq.com', '2019-01-05 21:57:01', NULL, 1, '描述12', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '资深工程师', '研发部');
+INSERT INTO `team_member_account` VALUES (21, '6v7be19pwman2fird04gqu11', '6v7be19pwman2fird04gqu53', '6v7be19pwman2fird04gqu53', 'axr73ydzo5gemks0pl9qnt16', '3', 1, 'admin', '18681140825', '545522390@qq.com', '2019-01-05 21:57:01', NULL, 1, '描述12', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '资深工程师', '研发部');
 INSERT INTO `team_member_account` VALUES (135, 'd89ce978017342fdbc99d7dd591582c0', 'bddc79203627409e9928b290b952ee88', '6v7be19pwman2fird04gqu53', '', '101', 0, '张一', '13399944031', '322323@qq.com', '2020-07-06 10:51:00', NULL, 1, '', NULL, '主任', '');
 INSERT INTO `team_member_account` VALUES (136, '092cca04b25242df87f4fbbf25325be0', 'bddc79203627409e9928b290b952ee88', '2360f2f0f79447f4a2498ae06a9b132d', '', '100', 1, '张一', '13399944031', '322323@qq.com', '2020-07-06 10:51:00', NULL, 1, '', NULL, '资深工程师', '某某公司－某某某事业群－某某平台部－某某技术部－BM');
 INSERT INTO `team_member_account` VALUES (137, '7e410def98f24bd991f53560cd49c62c', '6d44c444965349ae926cd5be98912292', '6v7be19pwman2fird04gqu53', '', '103', 0, '王伟', '13399944032', '3332324@qq.com', '2020-07-06 10:51:01', NULL, 1, '', NULL, '科员', '');
@@ -322,7 +322,7 @@ CREATE TABLE `team_notify`  (
 -- ----------------------------
 -- Records of team_notify
 -- ----------------------------
-INSERT INTO `team_notify` VALUES (4325, '潘利业', '指给王伟的任务', 'notice', '6v7be19pwman2fird04gqu53', '6d44c444965349ae926cd5be98912292', NULL, 0, NULL, 'project', NULL, NULL, 'task', 'project', 'system', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '0');
+INSERT INTO `team_notify` VALUES (4325, 'admin', '指给王伟的任务', 'notice', '6v7be19pwman2fird04gqu53', '6d44c444965349ae926cd5be98912292', NULL, 0, NULL, 'project', NULL, NULL, 'task', 'project', 'system', 'http://127.0.0.1:8888/common/image?filePathName=/member/avatar/6v7be19pwman2fird04gqu53/20200709/17c8573b917c4b45a1cb61588522780d-project.png&realFileName=project.png', '0');
 
 -- ----------------------------
 -- Table structure for team_organization
@@ -348,7 +348,7 @@ CREATE TABLE `team_organization`  (
 -- ----------------------------
 -- Records of team_organization
 -- ----------------------------
-INSERT INTO `team_organization` VALUES (1, '潘利业个人项目', NULL, NULL, '6v7be19pwman2fird04gqu53', '2018-10-12', 1, '6v7be19pwman2fird04gqu53', '', 0, 0, 0);
+INSERT INTO `team_organization` VALUES (1, 'admin个人项目', NULL, NULL, '6v7be19pwman2fird04gqu53', '2018-10-12', 1, '6v7be19pwman2fird04gqu53', '', 0, 0, 0);
 INSERT INTO `team_organization` VALUES (38, '张一的个人项目', NULL, NULL, 'bddc79203627409e9928b290b952ee88', '2020-07-06 10:50:59', 1, '2360f2f0f79447f4a2498ae06a9b132d', NULL, 0, 0, 0);
 INSERT INTO `team_organization` VALUES (39, '王伟的个人项目', NULL, NULL, '6d44c444965349ae926cd5be98912292', '2020-07-06 10:51:00', 1, 'f7041ee86dbc4b4494fbf17607ac94ce', NULL, 0, 0, 0);
 INSERT INTO `team_organization` VALUES (40, '李超的个人项目', NULL, NULL, 'e9b4bbe96f04474599c9f014ea1f47e7', '2020-07-06 10:51:01', 1, '47d5d113b44f44128cb79b1d4965c531', NULL, 0, 0, 0);
@@ -4397,7 +4397,7 @@ INSERT INTO `team_project_log` VALUES (4791, '354035376b334adb9c1a8d0b28e044e3',
 INSERT INTO `team_project_log` VALUES (4792, '63d25609285640b4a1f5001de1530180', '6v7be19pwman2fird04gqu53', '张一的任务', '创建了任务 ', 'create', '2020-07-06 16:57:18', '46077d78315d443382eb86e44225e29a', 'task', '', 0, '8c4f887129e54068996e2d10a1c3bac9', 'plus', 0);
 INSERT INTO `team_project_log` VALUES (4793, '15aced1fd3ac411ab57b9ac353990b5e', '6v7be19pwman2fird04gqu53', '', '认领了任务 ', 'claim', '2020-07-06 16:57:18', '46077d78315d443382eb86e44225e29a', 'task', 'bddc79203627409e9928b290b952ee88', 0, '8c4f887129e54068996e2d10a1c3bac9', 'alert', 1);
 INSERT INTO `team_project_log` VALUES (4794, '35c42296faca427589e05c2f807af9d0', '6v7be19pwman2fird04gqu53', '水利部1号项目', '创建了项目', 'create', '2020-07-06 17:07:26', '3488bba47b8e48fc9cc75f5e5580cfb4', NULL, '0', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'plus', 0);
-INSERT INTO `team_project_log` VALUES (4795, 'a3960650ea264084b8a09112911b78e1', '6v7be19pwman2fird04gqu53', '潘利业', '邀请潘利业加入项目', 'inviteMember', '2020-07-06 17:07:26', '3488bba47b8e48fc9cc75f5e5580cfb4', NULL, '6v7be19pwman2fird04gqu53', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'user-add', 0);
+INSERT INTO `team_project_log` VALUES (4795, 'a3960650ea264084b8a09112911b78e1', '6v7be19pwman2fird04gqu53', 'admin', '邀请admin加入项目', 'inviteMember', '2020-07-06 17:07:26', '3488bba47b8e48fc9cc75f5e5580cfb4', NULL, '6v7be19pwman2fird04gqu53', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'user-add', 0);
 INSERT INTO `team_project_log` VALUES (4796, 'c47c0fcda62040169839c4affbcd898c', 'bddc79203627409e9928b290b952ee88', '张一', '邀请张一加入项目', 'inviteMember', '2020-07-06 17:07:48', '3488bba47b8e48fc9cc75f5e5580cfb4', NULL, 'bddc79203627409e9928b290b952ee88', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'user-add', 0);
 INSERT INTO `team_project_log` VALUES (4797, '127edebb10ef477eb73e080f9e41ec00', '6d44c444965349ae926cd5be98912292', '王伟', '邀请王伟加入项目', 'inviteMember', '2020-07-06 17:07:49', '3488bba47b8e48fc9cc75f5e5580cfb4', NULL, '6d44c444965349ae926cd5be98912292', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'user-add', 0);
 INSERT INTO `team_project_log` VALUES (4798, 'fd0394857e6c4154813bef8a77736012', '6v7be19pwman2fird04gqu53', '张一负责的任务', '创建了任务 ', 'create', '2020-07-06 17:08:04', '23e47dd7bcc54acebe0122bb2c939b76', 'task', '', 0, '3488bba47b8e48fc9cc75f5e5580cfb4', 'plus', 0);
@@ -4474,7 +4474,7 @@ INSERT INTO `team_project_log` VALUES (4868, 'f3139ff35c314e8090d34b6e46a8fbaa',
 INSERT INTO `team_project_log` VALUES (4869, '6bb57430b44b41f0838fcc07fc659fc1', '6v7be19pwman2fird04gqu53', '', '指派给了 李超', 'assign', '2020-07-09 11:03:03', '8d4c1bde367f43ed9db2b7da13a059ae', 'task', 'e9b4bbe96f04474599c9f014ea1f47e7', 0, '8c4f887129e54068996e2d10a1c3bac9', 'alert', 1);
 INSERT INTO `team_project_log` VALUES (4870, '3fd80d9c7ded4322a4448dbf7009d4e7', '6v7be19pwman2fird04gqu53', '', '指派给了 李超', 'assign', '2020-07-09 11:03:47', 'da7a9009fae44bb6a701ffbc5bab7f6b', 'task', 'e9b4bbe96f04474599c9f014ea1f47e7', 0, '8c4f887129e54068996e2d10a1c3bac9', 'alert', 1);
 INSERT INTO `team_project_log` VALUES (4871, '1993c4a6aaa848a592eb63f5a6351bac', '6v7be19pwman2fird04gqu53', '', '指派给了 李超', 'assign', '2020-07-09 11:03:59', '0375e80f2edf48e3835a8cd73a1532e1', 'task', 'e9b4bbe96f04474599c9f014ea1f47e7', 0, '8c4f887129e54068996e2d10a1c3bac9', 'alert', 1);
-INSERT INTO `team_project_log` VALUES (4872, '88b95141e23545b7a84f5644b0ac7ed9', '6v7be19pwman2fird04gqu53', '@潘利业  赶紧 干', '@潘利业  赶紧 干', 'comment', '2020-07-11 17:52:31', 'dccf7dbf08fc4323bc124a948f6c6c74', 'task', '', 1, '3488bba47b8e48fc9cc75f5e5580cfb4', 'file-text', 0);
+INSERT INTO `team_project_log` VALUES (4872, '88b95141e23545b7a84f5644b0ac7ed9', '6v7be19pwman2fird04gqu53', '@admin  赶紧 干', '@admin  赶紧 干', 'comment', '2020-07-11 17:52:31', 'dccf7dbf08fc4323bc124a948f6c6c74', 'task', '', 1, '3488bba47b8e48fc9cc75f5e5580cfb4', 'file-text', 0);
 INSERT INTO `team_project_log` VALUES (4873, '47c9c5fd63cb43aba9c69b0ac7c9e0b4', '6v7be19pwman2fird04gqu53', '@王伟  干啊', '@王伟  干啊', 'comment', '2020-07-11 17:53:47', 'c3f30c32f31b46a8b2b413ffb7f742d9', 'task', '', 1, '3488bba47b8e48fc9cc75f5e5580cfb4', 'file-text', 0);
 INSERT INTO `team_project_log` VALUES (4874, 'dc582274205e4afa9cd0d53b11d07206', '6v7be19pwman2fird04gqu53', '@王伟  111', '@王伟  111', 'comment', '2020-07-11 17:55:51', 'c3f30c32f31b46a8b2b413ffb7f742d9', 'task', '', 1, '3488bba47b8e48fc9cc75f5e5580cfb4', 'file-text', 0);
 

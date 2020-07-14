@@ -20,6 +20,6 @@ public interface ProjectLogMapper  extends BaseMapper<ProjectLog> {
     IPage<Map> selectProjectLogByParam(IPage<Map> iPage, @Param("params") Map params);
 
     @Select("select * from team_project_log where action_type='task' and source_code=#{sourceCode} and type='done' order by id desc ")
-    List<Map> selectProjectLogBySourceCode(String sourceCode);
+    List<Map> selectProjectLogBySourceCode(@Param("sourceCode") String sourceCode);
 
 }

@@ -15,13 +15,13 @@ import java.util.Map;
 public interface MemberAccountMapper extends BaseMapper<MemberAccount> {
 
     @Select("SELECT * FROM team_member_account WHERE organization_code = #{orgCode} ")
-    List<Map> getMemberCountByOrgCode(String orgCode);
+    List<Map> getMemberCountByOrgCode(@Param("orgCode") String orgCode);
 
     @Select("SELECT * FROM team_member_account A WHERE A.name LIKE CONCAT('%',#{name},'%') AND A.organization_code = #{orgCode}")
-    List<Map> getMemberCountByOrgCodeAndMemberName(String orgCode,String name);
+    List<Map> getMemberCountByOrgCodeAndMemberName(@Param("orgCode") String orgCode,@Param("name") String name);
 
     @Select("SELECT * FROM team_member_account WHERE member_code = #{memberCode} AND organization_code = #{orgCode} LIMIT 1")
-    Map selectMemberAccountByMemCodeAndOrgCode(String memberCode,String orgCode);
+    Map selectMemberAccountByMemCodeAndOrgCode(@Param("memberCode") String memberCode,@Param("orgCode") String orgCode);
 
 
     @Select("SELECT * FROM team_member_account WHERE organization_code = #{params.orgCode} AND status = #{params.status} AND department_code LIKE CONCAT('%',#{params.depCode},'%') ORDER BY id ASC")
@@ -31,16 +31,16 @@ public interface MemberAccountMapper extends BaseMapper<MemberAccount> {
     IPage<Map> selectMemberAccountByOrgCodeAndStatus(IPage<Map> page, @Param("params") Map params);
 
     @Select("SELECT * FROM team_member_account WHERE code = #{memAccCode} ")
-    Map selectMemberAccountByCode(String memAccCode);
+    Map selectMemberAccountByCode(@Param("memAccCode") String memAccCode);
 
     @Select("SELECT * FROM team_member_account WHERE member_code = #{memCode} ")
-    Map selectMemberAccountByMemCode(String memCode);
+    Map selectMemberAccountByMemCode(@Param("memCode") String memCode);
 
     @Delete("DELETE FROM team_department_member WHERE account_code = #{accCode} AND organization_code = #{orgCode}")
-    Integer deleteDepartmentMemberByAccCodeAndOrgCode(String accCode,String orgCode);
+    Integer deleteDepartmentMemberByAccCodeAndOrgCode(@Param("accCode") String accCode,@Param("orgCode") String orgCode);
 
     @Update("update team_member_account a set a.department_code=#{departCodes}  WHERE a.code = #{code}")
-    Integer updateDepartCodeByCode(String departCodes,String code);
+    Integer updateDepartCodeByCode(@Param("departCodes") String departCodes,@Param("code") String code);
 
 
 }

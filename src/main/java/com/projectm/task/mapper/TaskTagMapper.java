@@ -16,10 +16,10 @@ import java.util.Map;
 public interface TaskTagMapper  extends BaseMapper<TaskTag> {
 
     @Select("SELECT * FROM team_task_tag WHERE project_code = #{projectCode} ORDER BY name ASC")
-    List<Map> selectTaskTagByProjectCode(String projectCode);
+    List<Map> selectTaskTagByProjectCode(@Param("projectCode") String projectCode);
 
     @Select("SELECT * FROM team_task_tag WHERE code = #{code} LIMIT 1")
-    Map selectTaskTagByCode(String code);
+    Map selectTaskTagByCode(@Param("code") String code);
 
     @Select("SELECT * FROM team_task_tag WHERE name = #{params.name} AND project_code = #{params.projectCode} LIMIT 1")
     Map selectTaskTagByNameAndProjectCode(@Param("params") Map params);

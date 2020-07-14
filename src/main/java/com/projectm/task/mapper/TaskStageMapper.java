@@ -17,7 +17,7 @@ import java.util.Map;
 public interface TaskStageMapper extends BaseMapper<TaskStage> {
 
     @Select("SELECT * FROM team_task_stages A  WHERE A.project_code = #{projectCode}")
-    List<Map> selectTaskStageByProjectCode(String projectCode);
+    List<Map> selectTaskStageByProjectCode(@Param("projectCode")  String projectCode);
 
     @Select("SELECT * FROM team_task_stages A  WHERE A.project_code = #{params.projectCode} order by sort asc,id asc")
     IPage<TaskStage> selectTaskStageByProjectCodeForPage(IPage page, @Param("params") Map params);
