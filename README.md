@@ -20,7 +20,7 @@ MYSQL 8
 
 1.演示地址：http://teamwork.mokingsoft.com
 
-admin/123456
+admin/111111
 
 2.如果库运行时如果报 ONLY_FULL_GROUP_BY 相关错误，是由于mysql8的兼容配置引起，请做以下操作：
 
