@@ -42,7 +42,7 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 #### 问题反馈
 
-1、欢迎大家使用，目前版本，可学习，可商用。
+1、欢迎大家使用，目前版本，可学习，可商用，欢迎大家共同开发，共同完善。
 
 2、技术交流群（仅技术交流）：855354961
 
