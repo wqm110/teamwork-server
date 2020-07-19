@@ -1,7 +1,7 @@
 # mk-teamwork-server
 
 #### 介绍
-mk-teamwork是任务协同项目管理系统，
+mk-teamwork是任务协同项目管理系统，是在pear project 基础上的JAVA 实现 ，目前项目完成了主要流程，后续会继续完善 ，打造一个实用的协同工作平台。
 
 #### 软件架构
 JAVA 1.8
@@ -19,7 +19,8 @@ MYSQL 8
 #### 使用说明
 
 1.演示地址：http://teamwork.mokingsoft.com
-admin/1
+
+admin/111111
 
 2.如果库运行时如果报 ONLY_FULL_GROUP_BY 相关错误，是由于mysql8的兼容配置引起，请做以下操作：
 
@@ -28,8 +29,12 @@ admin/1
 my.cnf位于etc文件夹下，vim下光标移到最后，添加如下：
 
 sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+#### 系统截图
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142642_ba78ff2a_132459.png "11.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142654_6a430b66_132459.png "2.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142743_59e7e773_132459.png "1.png")
 
-#### 参与贡献
+#### 特此鸣谢
 
 1.  感谢vilson，本项目是pearProject的JAVA版本，后续会保持与pearProject同步，继续完善
 2.  pearProject 地址：https://gitee.com/vilson/vue-projectManage
@@ -37,6 +42,11 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 #### 问题反馈
 
-1、欢迎大家使用，目前版本，可学习，可商用。
+1、欢迎大家使用，目前版本，可学习，可商用，欢迎大家共同开发，共同完善。
 
-2、技术交流群（仅技术交流）：       
+2、技术交流群（仅技术交流）：855354961
+
+
+#### 鼓励一下
+
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/144051_01ee1fb3_132459.png "22.png")
