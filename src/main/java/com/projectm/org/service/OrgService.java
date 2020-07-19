@@ -131,11 +131,13 @@ public class OrgService{
     public Object removeMember(String organizationcode, String accountCode, String departmentCode) {
         MemberAccount one = memberAccountService.lambdaQuery().eq(MemberAccount::getCode, accountCode).one();
         List<String> depList = Arrays.stream(one.getDepartment_code().split(",")).collect(Collectors.toList());
-        for (String str : depList) {
-            if (StrUtil.equals(str, departmentCode)) {
-                depList.remove(str);
-            }
-        }
+//        for (String str : depList) {
+//            if (StrUtil.equals(str, departmentCode)) {
+//                depList.remove(str);
+//            }
+//        }
+       depList.removeIf(str -> StrUtil.equals(str, departmentCode));
+
         String depCode = null;
         String depStr = null;
         if (CollUtil.isNotEmpty(depList)) {

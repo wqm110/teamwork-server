@@ -10,6 +10,9 @@ import com.framework.utils.FileUtils;
 import com.projectm.common.DateUtils;
 import com.projectm.config.MProjectConfig;
 import com.projectm.login.entity.LoginUser;
+
+import cn.hutool.core.util.StrUtil;
+
 import org.apache.commons.collections.MapUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -97,4 +100,12 @@ public class BaseController {
         //member.put("memberCountCode","6v7be19pwman2fird04gqu11");
         return member;
     }
+    
+    public String getOrgCode() {
+    	String organizationCode = ServletUtils.getHeaderParam("organizationCode");
+    		if (StrUtil.isEmpty(organizationCode)) {
+    			throw new CustomException("缺少组织信息");
+    		}
+    		return organizationCode;
+    	}
 }

@@ -111,10 +111,11 @@ public class MemberAccountService extends ServiceImpl<MemberAccountMapper,Member
                 projectCodes.add(MapUtils.getString(m,"code"));
             }
         }
-        Map params = new HashMap();
-        params.put("proCodeList",projectCodes);
-        params.put("memCode",MapUtils.getString(memAccountMap,"member_code"));
-        Integer delProjectMemberResult = projectMapper.delProjectMember(params);
+//        Map params = new HashMap();
+//        params.put("proCodeList",projectCodes);
+//        params.put("memCode",MapUtils.getString(memAccountMap,"member_code"));
+        Integer delProjectMemberResult = projectMapper.delProjectMember(projectCodes,MapUtils.getString(memAccountMap,"member_code"));
+        //Integer delProjectMemberResult = projectMapper.delProjectMember(params);
 
 
         Integer delMemberAccountResult = baseMapper.deleteById(MapUtils.getInteger(memAccountMap,"id"));

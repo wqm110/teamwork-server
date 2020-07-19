@@ -1,14 +1,20 @@
 package com.projectm.member.domain;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.projectm.domain.BaseDomain;
-import lombok.*;
 
-import java.io.Serializable;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @TableName("team_member_account")
 @Data
@@ -38,5 +44,7 @@ public class MemberAccount extends BaseDomain implements Serializable {
     private String department;
     @TableField(exist = false)
     private List<String> nodeList;
+    @TableField(exist = false)
+    private List<Map<String, String>> departList;
 
 }
