@@ -10,15 +10,11 @@ import com.projectm.common.DateUtil;
 import com.projectm.login.entity.LoginUser;
 import com.projectm.system.domain.Notify;
 import com.projectm.system.mapper.NotifyMapper;
-import io.swagger.models.auth.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,19 +52,19 @@ public class NotifyService extends ServiceImpl<NotifyMapper, Notify> {
     public Map<String, Object> getNoReads() {
         LoginUser loginUser = UserUtil.getLoginUser();
         //获取通知信息  is_read: 0 未读  1 已读
-        List<Notify> list = lambdaQuery().eq(Notify::getIs_read, "0").eq(Notify::getTo, loginUser.getUser().getCode()).list();
-        List<Notify> message = list.parallelStream().filter(o -> StrUtil.equals(Constants.MESSAGE, o.getType())).collect(Collectors.toList());
-        List<Notify> notice = list.parallelStream().filter(o -> StrUtil.equals(Constants.NOTICE, o.getType())).collect(Collectors.toList());
-        List<Notify> task = list.parallelStream().filter(o -> StrUtil.equals(Constants.TASK, o.getType())).collect(Collectors.toList());
+        List<Notify> list = lambdaQuery().eq(Notify::getIs_read, "0").eq(Notify::getTo, loginUser.getUser().getCode()).last("limit 100").list();
+        List<Notify> message = list.parallelStream().filter(o -> StrUtil.equals(Constants.MESSAGE, o.getType())).sorted(Comparator.comparing(Notify::getCreate_time).reversed()).collect(Collectors.toList());
+        List<Notify> notice = list.parallelStream().filter(o -> StrUtil.equals(Constants.NOTICE, o.getType())).sorted(Comparator.comparing(Notify::getCreate_time).reversed()).collect(Collectors.toList());
+        List<Notify> task = list.parallelStream().filter(o -> StrUtil.equals(Constants.TASK, o.getType())).sorted(Comparator.comparing(Notify::getCreate_time).reversed()).collect(Collectors.toList());
         int messageSum = CollUtil.isNotEmpty(message) ? message.size() : 0;
         int noticeSum = CollUtil.isNotEmpty(notice) ? notice.size() : 0;
         int taskSum = CollUtil.isNotEmpty(task) ? task.size() : 0;
         int total = messageSum + noticeSum + taskSum;
         Map<String, Object> result = new HashMap<>(8);
         Map<String, Object> listMap = new HashMap<>(8);
-        listMap.put("notice", notice);
-        listMap.put("message", message);
-        listMap.put("task", task);
+        listMap.put("notice", CollUtil.isNotEmpty(notice) && notice.size() > 5 ? notice.subList(0, 5) : notice);
+        listMap.put("message", CollUtil.isNotEmpty(message) && message.size() > 5 ? message.subList(0, 5) : message);
+        listMap.put("task", CollUtil.isNotEmpty(task) && task.size() > 5 ? task.subList(0, 5) : task);
         Map<String, Object> totalSum = new HashMap<>(8);
         totalSum.put("notice", noticeSum);
         totalSum.put("message", messageSum);

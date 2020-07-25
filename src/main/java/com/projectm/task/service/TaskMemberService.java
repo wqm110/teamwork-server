@@ -36,6 +36,9 @@ public class TaskMemberService  extends ServiceImpl<TaskMemberMapper, TaskMember
     ProjectMemberService projectMemberService;
     @Autowired
     ProjectService projectService;
+    @Autowired
+    TaskWorkflowService taskWorkflowService;
+    
     public IPage<Map> getTaskMemberByTaskCode(IPage iPage,String taskCode){
         return baseMapper.selectTaskMemberByTaskCode(iPage,taskCode);
     }
@@ -58,6 +61,8 @@ public class TaskMemberService  extends ServiceImpl<TaskMemberMapper, TaskMember
             TaskMember hasJoined = lambdaQuery().eq(TaskMember::getMember_code,memberCode).eq(TaskMember::getTask_code,taskCode).one();
             if(!ObjectUtils.isEmpty(hasJoined)){
                 taskService.lambdaUpdate().set(Task::getAssign_to,memberCode).eq(Task::getCode,taskCode).update();
+                taskWorkflowService.queryRule(task.getProject_code(), task.getStage_code(), task.getCode(), memberCode, 3);
+                
                 lambdaUpdate().set(TaskMember::getIs_executor,1).eq(TaskMember::getTask_code,taskCode).eq(TaskMember::getMember_code,memberCode).update();
                 String logType ="assign";
                 if(UserUtil.getLoginUser().getUser().getCode().equals(memberCode)){

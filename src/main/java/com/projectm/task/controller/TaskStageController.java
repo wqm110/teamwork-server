@@ -1,7 +1,6 @@
 package com.projectm.task.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.alibaba.fastjson.JSONObject;
 import com.framework.common.AjaxResult;
 import com.framework.common.utils.StringUtils;
 import com.projectm.common.CommUtils;
@@ -9,20 +8,17 @@ import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
 import com.projectm.member.service.MemberAccountService;
 import com.projectm.member.service.MemberService;
-import com.projectm.project.domain.ProjectLog;
 import com.projectm.project.service.ProjectLogService;
 import com.projectm.project.service.ProjectService;
 import com.projectm.project.service.SourceLinkService;
-import com.projectm.task.domain.*;
+import com.projectm.task.domain.TaskStagesTemplete;
 import com.projectm.task.service.*;
 import com.projectm.web.BaseController;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/project")
@@ -59,7 +55,7 @@ public class TaskStageController extends BaseController {
     private TaskTagService taskTagService;
 
     @Autowired
-    private  TaskToTagService taskToTagService;
+    private TaskToTagService taskToTagService;
 
     @Autowired
     private TaskMemberService taskMemberService;
@@ -70,9 +66,9 @@ public class TaskStageController extends BaseController {
 
     @PostMapping("/task_stages_template/index")
     @ResponseBody
-    public AjaxResult taskStagesTemplate(@RequestParam Map<String,Object> mmap){
-        String code = MapUtils.getString(mmap,"code");
-        if(StringUtils.isEmpty(code)){
+    public AjaxResult taskStagesTemplate(@RequestParam Map<String, Object> mmap) {
+    	String code = MapUtils.getString(mmap, "code");
+    	if (StringUtils.isEmpty(code)) {
             return AjaxResult.warn("请选择一个项目");
         }
         return AjaxResult.success(Constant.createPageResultMap(taskStagesTempleteService.getTaskStagesTemplate(Constant.createPage(mmap),code)));
@@ -110,7 +106,8 @@ public class TaskStageController extends BaseController {
         if(ObjectUtils.isEmpty(tst)){
             return AjaxResult.warn("该任务已失效");
         }
-        tst.setName(name);tst.setSort(sort);
+        tst.setName(name);
+        tst.setSort(sort);
         boolean result = taskStagesTempleteService.updateById(tst);
         if(result){
             return AjaxResult.success("编辑任务成功",tst);
@@ -136,4 +133,44 @@ public class TaskStageController extends BaseController {
             return AjaxResult.error("操作失败，请稍候再试！");
         }
     }
+    
+        /**
+         * 保存任务流转
+         *
+         * @return
+         */
+        @PostMapping("/task_workflow/save")
+        @ResponseBody
+        public AjaxResult save(String projectCode, String taskWorkflowName, String taskWorkflowRules) {
+            String orgCode = getOrgCode();
+            JSONObject rules = JSONObject.parseObject(taskWorkflowRules);
+            taskWorkflowService.save(orgCode, projectCode, taskWorkflowName, rules);
+            return AjaxResult.success("保存成功");
+        }
+    
+        /**
+         * 编辑任务流转
+         *
+         * @return
+         */
+        @PostMapping("/task_workflow/edit")
+        @ResponseBody
+        public AjaxResult edit(String taskWorkflowCode, String taskWorkflowName, String taskWorkflowRules) {
+            JSONObject rules = JSONObject.parseObject(taskWorkflowRules);
+            taskWorkflowService.update(taskWorkflowCode, taskWorkflowName, rules);
+            return AjaxResult.success("修改成功");
+        }
+    
+        /**
+         * 删除任务流转
+         *
+         * @return
+         */
+        @PostMapping("/task_workflow/delete")
+        @ResponseBody
+        public AjaxResult delete(String taskWorkflowCode) {
+            taskWorkflowService.delete(taskWorkflowCode);
+            return AjaxResult.success("删除成功");
+        }
+     
 }

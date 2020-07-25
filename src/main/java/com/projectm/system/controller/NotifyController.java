@@ -104,8 +104,8 @@ public class NotifyController   extends BaseController {
         String title = MapUtils.getString(mmap,"title");
         String date = MapUtils.getString(mmap,"date");
 
-        LambdaQueryChainWrapper lambdaQuery = notifyService.lambdaQuery().eq(Notify::getType,MapUtils.getString(mmap,"type"))
-                .eq(Notify::getTo, UserUtil.getLoginUser().getUser().getCode())
+        LambdaQueryChainWrapper lambdaQuery = notifyService.lambdaQuery()
+        		.eq(Notify::getTo, UserUtil.getLoginUser().getUser().getCode())
                 .eq(Notify::getTerminal,"project");
         if(StringUtils.isNotEmpty(title)){
             lambdaQuery.like("title",title);

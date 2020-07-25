@@ -87,7 +87,8 @@ public class OrgService{
             memberAccountList.forEach(o -> {
                 MemberVo memberVo;
                 MemberVo.MemberVoBuilder voBuilder = MemberVo.builder().name(o.getName()).accountCode(o.getCode()).avatar(o.getAvatar()).email(o.getEmail());
-                if (o.getDepartment_code().contains(departmentCode)) {
+                
+                if (StrUtil.isNotEmpty(o.getDepartment_code()) && o.getDepartment_code().contains(departmentCode)) {
                     memberVo = voBuilder.joined(true).build();
                 } else {
                     memberVo = voBuilder.joined(false).build();

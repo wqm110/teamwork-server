@@ -129,6 +129,12 @@ public class Constants
      * 消息通知类型--任务
      */
     public static final String TASK = "task";
-
-
+    /**
+     * 项目任务流转规则前缀
+     */
+    public static final String PROJECTRULE = "projectrule";
+    /**
+    * WebSocket前缀
+    */
+    public static final String WEBSOCKET = "webSocket";
 }

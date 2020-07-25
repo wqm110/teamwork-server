@@ -797,16 +797,16 @@ public class TaskController  extends BaseController {
      * @param mmap
      * @return
      */
-    @PostMapping("/task_workflow/delete")
-    @ResponseBody
-    public AjaxResult taskWorkflowDelete(@RequestParam Map<String,Object> mmap)  throws Exception
-    {
-        String taskWorkflowCode = MapUtils.getString(mmap,"taskWorkflowCode");
-
-        int i = taskWorkflowService.deleteTaskWorkflowByCode(taskWorkflowCode);
-        return AjaxResult.success(i);
-
-    }
+//    @PostMapping("/task_workflow/delete")
+//    @ResponseBody
+//    public AjaxResult taskWorkflowDelete(@RequestParam Map<String,Object> mmap)  throws Exception
+//    {
+//        String taskWorkflowCode = MapUtils.getString(mmap,"taskWorkflowCode");
+//
+//        int i = taskWorkflowService.deleteTaskWorkflowByCode(taskWorkflowCode);
+//        return AjaxResult.success(i);
+//
+//    }
 
     /**
      * 项目管理	我的项目 项目设置 任务流转 编辑任务

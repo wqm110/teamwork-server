@@ -1,13 +1,17 @@
 package com.framework.security.handler;
 
-import com.framework.common.ResultJson;
-import com.framework.common.utils.ServletUtils;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.framework.common.ResultJson;
+import com.framework.common.utils.ServletUtils;
+import com.projectm.config.WebSocketServer;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @version V1.0
@@ -20,9 +24,16 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
 
+	@Resource
+	WebSocketServer webSocketServer;
+	
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         log.info("身份注销{}", true);
+        if(webSocketServer!=null){
+        	webSocketServer.onClose();	
+        }
+        
         ServletUtils.renderString(response, ResultJson.ok().toString());
     }
 }

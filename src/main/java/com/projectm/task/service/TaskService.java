@@ -1,65 +1,75 @@
 package com.projectm.task.service;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.additional.update.impl.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.framework.common.AjaxResult;
-import com.framework.common.exception.CustomException;
 import com.framework.common.constant.Constants;
+import com.framework.common.exception.CustomException;
 import com.framework.common.utils.StringUtils;
+import com.framework.security.util.RedisCache;
 import com.framework.security.util.UserUtil;
-import com.mchange.v1.db.sql.ConnectionUtils;
 import com.projectm.common.CommUtils;
 import com.projectm.common.DateUtil;
+import com.projectm.config.WebSocketServer;
 import com.projectm.mapper.CommMapper;
 import com.projectm.member.domain.Member;
 import com.projectm.member.service.MemberService;
 import com.projectm.project.domain.Project;
 import com.projectm.project.domain.ProjectLog;
-import com.projectm.project.mapper.ProjectMapper;
 import com.projectm.project.service.CollectionService;
 import com.projectm.project.service.ProjectLogService;
 import com.projectm.project.service.ProjectService;
 import com.projectm.project.service.ProjectVersionService;
 import com.projectm.system.domain.Notify;
 import com.projectm.system.service.NotifyService;
-import com.projectm.task.domain.*;
+import com.projectm.task.domain.Task;
+import com.projectm.task.domain.TaskLike;
+import com.projectm.task.domain.TaskMember;
+import com.projectm.task.domain.TaskStage;
+import com.projectm.task.domain.TaskTag;
+import com.projectm.task.domain.TaskToTag;
 import com.projectm.task.mapper.TaskLikeMapper;
 import com.projectm.task.mapper.TaskMapper;
 import com.projectm.task.mapper.TaskTagMapper;
 import com.projectm.task.mapper.TaskToTagMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.velocity.runtime.directive.Break;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class TaskService   extends ServiceImpl<TaskMapper, Task> {
 
+	@Resource
+	WebSocketServer webSocketServer;
 
     @Autowired
     CommMapper commMapper;
@@ -71,7 +81,9 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
 
     @Autowired
     NotifyService notifyService;
-
+    @Autowired
+    TaskWorkflowService taskWorkflowService;
+    
     public List<Map> tasks(Map param){
         String stageCode = MapUtils.getString(param,"stageCode","");
         Integer done = MapUtils.getInteger(param,"done",-1);
@@ -180,8 +192,8 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
                         map.put("executor",executor);
                         taskMemberMap.put(assign_to,executorMap);
                     }
-                    map = buildTaskMap(map,UserUtil.getLoginUser().getUser().getCode());
                 }
+                map = buildTaskMap(map,UserUtil.getLoginUser().getUser().getCode());
                 resultList.add(map);
             }
         }
@@ -487,6 +499,7 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
 
         if(i>0){
             Map taskMap = baseMapper.selectTaskByCode(task.getCode());
+            taskWorkflowService.queryRule(task.getProject_code(), task.getStage_code(), task.getCode(), null, 0);
             return AjaxResult.success(buildTaskMap(taskMap,task.getCreate_by()));
         }
         return AjaxResult.warn("保存失败！");
@@ -884,6 +897,11 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
             throw new CustomException("子任务尚未全部完成，无法完成父任务");
         }
         lambdaUpdate().eq(Task::getCode,taskCode).set(Task::getDone,done).update();
+        String projectCode = MapUtils.getString(taskMap, "project_code");
+        String stageCode = MapUtils.getString(taskMap, "stage_code");
+        if (done == 1) {
+        	taskWorkflowService.queryRule(projectCode, stageCode, taskCode, null, 1);
+        }        
         LambdaQueryWrapper<Project> projectQW = new LambdaQueryWrapper<>();
         projectQW.eq(Project::getCode, MapUtils.getString(taskMap,"project_code"));
         Project project = projectService.getBaseMapper().selectOne(projectQW);
@@ -1120,7 +1138,8 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
                     if(taskMemberCode.equals(MapUtils.getString(data,"memberCode"))){
                         continue;//跳过产生者
                     }
-                    notifyService.save(Notify.builder()
+                    //notifyService.save(Notify.builder()
+                    Notify build = Notify.builder()		
                             .content(notifyData.getContent())
                             .title(notifyData.getTitle())
                             .type(notifyData.getType())
@@ -1129,7 +1148,9 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
                             .action(notifyData.getAction())
                             .avatar(notifyData.getAvatar()).terminal(notifyData.getTerminal())
                             .from_type("system").create_time(DateUtil.getCurrentDateTime())
-                            .build());
+                            .build();
+                    notifyService.save(build);
+                    webSocketServer.sendInfo(build, taskMemberCode);
                 }
             }
         }

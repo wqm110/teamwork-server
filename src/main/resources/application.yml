@@ -96,8 +96,7 @@ spring:
       #url: jdbc:mysql://139.199.229.215:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
       url: jdbc:mysql://122.112.164.217:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
       username: teamwork
-      password: Admin@123!
-      #password: P@ssWord8.0
+      password: P@ssWord8.0
   #Redis
   redis:
     # 地址
@@ -105,7 +104,7 @@ spring:
     # 端口，默认为6379
     port: 6379
     # 密码
-    password: fZxm2gSUeR9VfXzZlk9GemUw2
+    password: 
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -205,4 +204,4 @@ jwt:
 #要放行的url
 custom:
   ignored-role-path: /favicon.ico, /teamwork/login, /index/index/refreshAccessToken, /project/login/getCaptcha, /project/login/register, /project/task/_downloadTemplate, /project/task/uploadFile,
-      /project/department_member/_downloadTemplate, /project/department_member/uploadFile, /common/download, /project/index ,/common/image
+      /project/department_member/_downloadTemplate, /project/department_member/uploadFile, /common/download, /project/index ,/common/image, /imserver
