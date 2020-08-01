@@ -1,5 +1,7 @@
 package com.framework.security.handler;
 
+import java.io.IOException;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,15 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	@Resource
-	WebSocketServer webSocketServer;
-	
-    @Override
-    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        log.info("身份注销{}", true);
-        if(webSocketServer!=null){
-        	webSocketServer.onClose();	
-        }
+	 @Resource
+     WebSocketServer webSocketServer;
+  
+     @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        WebSocketServer.logOut(request.getSession().getId());
         
         ServletUtils.renderString(response, ResultJson.ok().toString());
     }

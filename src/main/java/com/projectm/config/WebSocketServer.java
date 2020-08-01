@@ -6,30 +6,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.servlet.http.HttpSession;
+import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.druid.support.json.JSONUtils;
-
 import com.framework.common.constant.Constants;
 import com.framework.common.exception.CustomException;
 import com.framework.security.util.RedisCache;
 import com.projectm.system.domain.Notify;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 
 
-@ServerEndpoint("/imserver")
+@ServerEndpoint(value = "/imserver")
 @Component
 public class WebSocketServer {
 
@@ -41,6 +37,8 @@ public class WebSocketServer {
     /**concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。*/
 //    private static ConcurrentHashMap<WebSocketServer> SESSION_WEBSOCKET_MAP = new ConcurrentHashMap<>();
     private static CopyOnWriteArraySet<WebSocketServer> websocketservers = new CopyOnWriteArraySet<>();
+
+    private static ConcurrentHashMap<String,WebSocketServer> SESSION_HTTP_WEBSOCKET_MAP = new ConcurrentHashMap<>();
     /**
      * Sessionid 与client_id的映射
      */
@@ -57,10 +55,13 @@ public class WebSocketServer {
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session, EndpointConfig config) {
         this.session = session;
         this.session_id=session.getId();
         websocketservers.add(this);
+        //HttpSession httpSession =(HttpSession)config.getUserProperties().get(HttpSession.class.getName());
+        //SESSION_HTTP_WEBSOCKET_MAP.put(httpSession.getId(),this);
+
         addOnlineCount();
         log.info("用户连接:"+session_id+",当前在线人数为:" + getOnlineCount());
         try {
@@ -143,10 +144,25 @@ public class WebSocketServer {
         this.session.getBasicRemote().sendText(message);
     }
 
+    public static void logOut(String httpSessionId) throws IOException {
+        WebSocketServer wss = SESSION_HTTP_WEBSOCKET_MAP.get(httpSessionId);
+        if(ObjectUtil.isNotEmpty(wss)){
+            websocketservers.remove(wss);
+        }
+        subOnlineCount();
+        sendMessageAll(JSONUtils.toJSONString(new HashMap(){{
+            put("action","connect");
+            put("data",new HashMap(){{
+                //put("client_id",session_id);
+                put("online",WebSocketServer.getOnlineCount());
+            }});
+        }}));
+    }
+
     /**
      * 群发推送
      */
-    public void sendMessageAll(String message) throws IOException {
+    public static void sendMessageAll(String message) throws IOException {
         for (WebSocketServer socketServer : websocketservers) {
             socketServer.session.getBasicRemote().sendText(message);
         }
@@ -198,7 +214,7 @@ public class WebSocketServer {
     }
 
     public static synchronized int getOnlineCount() {
-        return onlineCount;
+    	return onlineCount>0?onlineCount:1;
     }
 
     public static synchronized void addOnlineCount() {

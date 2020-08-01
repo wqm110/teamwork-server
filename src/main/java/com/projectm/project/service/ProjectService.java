@@ -1,7 +1,28 @@
 package com.projectm.project.service;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,7 +37,6 @@ import com.projectm.common.Constant;
 import com.projectm.common.DateUtil;
 import com.projectm.mapper.CommMapper;
 import com.projectm.member.domain.Member;
-import com.projectm.member.domain.MemberAccount;
 import com.projectm.member.domain.ProjectMember;
 import com.projectm.member.mapper.ProjectMemberMapper;
 import com.projectm.member.service.MemberAccountService;
@@ -32,22 +52,9 @@ import com.projectm.task.mapper.TaskMapper;
 import com.projectm.task.mapper.TaskStageMapper;
 import com.projectm.task.mapper.TaskStagesTempleteMapper;
 import com.projectm.task.service.TaskService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import oshi.util.StringUtil;
 
-import java.security.Key;
-import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 
 @Service
 public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
@@ -291,26 +298,27 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
         String memberCode = MapUtils.getString(member, "memberCode");
         String orgCode = MapUtils.getString(member, "organizationCode");
         //该组织下的所有项目
-        List<Project> list = lambdaQuery().select(Project::getCode, Project::getSchedule, Project::getCreate_time).eq(Project::getOrganization_code, orgCode).eq(Project::getDeleted, 0).list();
+        List<Project> list = lambdaQuery().select(Project::getCode, Project::getSchedule, Project::getCreate_time).eq(Project::getOrganization_code, orgCode)
+        		.eq(Project::getArchive, 0).eq(Project::getDeleted, 0).list();        
         if (CollUtil.isNotEmpty(list)) {
             List<String> proCodeList = list.parallelStream().map(Project::getCode).collect(Collectors.toList());
             //该组织下的所有项目用户信息
             List<ProjectMember> allProjectList = projectMemberMapper.selectList(Wrappers.<ProjectMember>lambdaQuery().in(ProjectMember::getProject_code, proCodeList));
-            if (CollUtil.isNotEmpty(allProjectList)) {
-                Map<String, String> memberCodeName = memberService.lambdaQuery().select(Member::getCode, Member::getName).in(Member::getCode, allProjectList
-                        .parallelStream().map(ProjectMember::getMember_code).collect(Collectors.toList())).list()
-                        .parallelStream().collect(Collectors.toMap(Member::getCode, Member::getName));
-                Map<String, Long> topNum = new LinkedHashMap<>();
-                allProjectList.stream().collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
-                        .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                        .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
-                topNum.forEach((key, val) -> {
-                    Map<String, Object> map = new HashMap<>(4);
-                    map.put("name", memberCodeName.get(key));
-                    map.put("total", val);
-                    projectTop.add(map);
-                });
-            }
+//            if (CollUtil.isNotEmpty(allProjectList)) {
+//                Map<String, String> memberCodeName = memberService.lambdaQuery().select(Member::getCode, Member::getName).in(Member::getCode, allProjectList
+//                        .parallelStream().map(ProjectMember::getMember_code).collect(Collectors.toList())).list()
+//                        .parallelStream().collect(Collectors.toMap(Member::getCode, Member::getName));
+//                Map<String, Long> topNum = new LinkedHashMap<>();
+//                allProjectList.stream().collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+//                        .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+//                        .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+//                topNum.forEach((key, val) -> {
+//                    Map<String, Object> map = new HashMap<>(4);
+//                    map.put("name", memberCodeName.get(key));
+//                    map.put("total", val);
+//                    projectTop.add(map);
+//                });
+//            }
             projectCount = list.size();
             while (date.getMonthValue() <= now.getMonthValue()) {
                 Map<String, Object> map = new HashMap<>(4);
@@ -349,13 +357,13 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
                 while (date1.getMonthValue() <= now.getMonthValue()) {
                     Map<String, Object> map = new HashMap<>(4);
                     LocalDate finalDate = date1;
-                    long count = tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getBegin_time())).filter(o -> {
-                        LocalDate begin = LocalDateTime.parse(o.getBegin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME_MIN)).toLocalDate();
-                        return begin.getMonthValue() == finalDate.getMonthValue() && begin.getYear() == finalDate.getYear();
+                    long count = tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                    	LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                    	return create.getMonthValue() == finalDate.getMonthValue() && create.getYear() == finalDate.getYear();
                     }).count();
-                    if (date1.getMonthValue() == now.getMonthValue()) {
-                        nowMonthProjectCount = (int) count;
-                    }
+//                    if (date1.getMonthValue() == now.getMonthValue()) {
+//                        nowMonthProjectCount = (int) count;
+//                    }
                     map.put("日期", date1.getMonthValue() + "月");
                     map.put("任务", count);
                     taskList.add(map);
@@ -377,10 +385,9 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
                         taskTop.add(map);
                     });
                 }
-                nowTaskCount = (int) tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getBegin_time()) && StrUtil.isNotEmpty(o.getEnd_time())).filter(o -> {
-                    LocalDateTime begin = LocalDateTime.parse(o.getBegin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME_MIN));
-                    LocalDateTime end = LocalDateTime.parse(o.getEnd_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME_MIN));
-                    return (begin.isBefore(now) && end.isAfter(now)) || begin.toLocalDate().equals(now.toLocalDate()) || end.toLocalDate().equals(now.toLocalDate());
+                nowTaskCount = (int) tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                	LocalDateTime create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME));
+                	return create.equals(now);
                 }).count();
                 //逾期任务 逾期率
                 taskOverdueCount = (int) tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getEnd_time())).filter(o -> {
@@ -418,5 +425,296 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
         result.put("weekRatio", weekRatio);
         result.put("dayRatio", dayRatio);
         return result;
+    }
+    
+
+    public Map<String, Object> getTopList(String orgCode, String dateType, String startDate, String endDate) {
+        //该组织下的所有项目
+        List<Project> projects = lambdaQuery().select(Project::getCode, Project::getSchedule, Project::getCreate_time).eq(Project::getOrganization_code, orgCode)
+                .eq(Project::getArchive, 0).eq(Project::getDeleted, 0).list();
+        List<Task> tasks = null;
+        List<ProjectMember> projectMemberList = null;
+        Map<String, String> memberCodeName = null;
+        if (CollUtil.isNotEmpty(projects)) {
+            List<String> proCodeList = projects.parallelStream().map(Project::getCode).collect(Collectors.toList());
+            //该组织下的所有项目用户信息
+            projectMemberList = projectMemberMapper.selectList(Wrappers.<ProjectMember>lambdaQuery().in(ProjectMember::getProject_code, proCodeList));
+            if (CollUtil.isNotEmpty(projectMemberList)) {
+                memberCodeName = memberService.lambdaQuery().select(Member::getCode, Member::getName).in(Member::getCode, projectMemberList
+                        .parallelStream().map(ProjectMember::getMember_code).collect(Collectors.toList())).list()
+                        .parallelStream().collect(Collectors.toMap(Member::getCode, Member::getName));
+            }
+            //任务
+            tasks = taskService.lambdaQuery().in(Task::getProject_code, proCodeList).list();
+        }
+        return buildInfo(dateType, startDate, endDate, projects, tasks, projectMemberList, memberCodeName);
+    }
+
+    private Map<String, Object> buildInfo(String dateType, String startDate, String endDate, List<Project> projects, List<Task> tasks,
+                          List<ProjectMember> projectMemberList, Map<String, String> memberCodeName) {
+        Map<String, Object> result = new HashMap<>();
+        LocalDate now = LocalDate.now();
+        List<Map<String, Object>> projectList = new ArrayList<>();
+        List<Map<String, Object>> projectTop = new ArrayList<>();
+        List<Map<String, Object>> taskList = new ArrayList<>();
+        List<Map<String, Object>> taskTop = new ArrayList<>();
+        if (StrUtil.isNotEmpty(dateType)) {
+            switch (dateType) {
+                case "day": {
+                    //项目数
+                    Map<String, Object> projectMap = new HashMap<>(4);
+                    long count = projects == null ? 0 : projects.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                        LocalDate begin = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                        return begin.equals(now);
+                    }).count();
+                    projectMap.put("日期", "今日");
+                    projectMap.put("数量", count);
+                    projectList.add(projectMap);
+                    //项目排行
+                    Map<String, Long> topNum = new LinkedHashMap<>();
+                    if (projectMemberList != null) {
+                        projectMemberList.stream().filter(o -> StrUtil.isNotEmpty(o.getJoin_time())).filter(o -> {
+                            LocalDate join = LocalDateTime.parse(o.getJoin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return join.equals(now);
+                        }).collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+                                .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                                .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+                        topNum.forEach((key, val) -> {
+                            Map<String, Object> topMap = new HashMap<>(4);
+                            topMap.put("name", memberCodeName.get(key));
+                            topMap.put("total", val);
+                            projectTop.add(topMap);
+                        });
+                    }
+                    //任务数
+                    Map<String, Object> taskMap = new HashMap<>(4);
+                    long taskCount = tasks == null ? 0 : tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                        LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                        return create.equals(now);
+                    }).count();
+                    taskMap.put("日期", "今日");
+                    taskMap.put("任务", taskCount);
+                    taskList.add(taskMap);
+                    break;
+                }
+                case "week": {
+                    LocalDate beginDate = now.with(DayOfWeek.MONDAY);
+                    LocalDate finalBeginDate1 = beginDate;
+                    while (beginDate.isBefore(now) || beginDate.equals(now)) {
+                        Map<String, Object> map = new HashMap<>(4);
+                        LocalDate finalBeginDate = beginDate;
+                        long count = projects == null ? 0 : projects.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate begin = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return begin.equals(finalBeginDate);
+                        }).count();
+                        String day;
+                        if (beginDate.getDayOfWeek() == DayOfWeek.MONDAY) {
+                            day = "星期一";
+                        } else if (beginDate.getDayOfWeek() == DayOfWeek.TUESDAY) {
+                            day = "星期二";
+                        } else if (beginDate.getDayOfWeek() == DayOfWeek.WEDNESDAY) {
+                            day = "星期三";
+                        } else if (beginDate.getDayOfWeek() == DayOfWeek.THURSDAY) {
+                            day = "星期四";
+                        } else if (beginDate.getDayOfWeek() == DayOfWeek.FRIDAY) {
+                            day = "星期五";
+                        } else if (beginDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                            day = "星期六";
+                        } else {
+                            day = "星期日";
+                        }
+                        map.put("日期", day);
+                        map.put("数量", count);
+                        projectList.add(map);
+                        //任务数
+                        Map<String, Object> taskMap = new HashMap<>(4);
+                        long taskCount = tasks == null ? 0 : tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return create.equals(now);
+                        }).count();
+                        taskMap.put("日期", day);
+                        taskMap.put("任务", taskCount);
+                        taskList.add(taskMap);
+                        beginDate = beginDate.plusDays(1);
+                    }
+                    Map<String, Long> topNum = new LinkedHashMap<>();
+                    if (projectMemberList != null) {
+                        projectMemberList.stream().filter(o -> StrUtil.isNotEmpty(o.getJoin_time())).filter(o -> {
+                            LocalDate join = LocalDateTime.parse(o.getJoin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return join.isAfter(finalBeginDate1.plusDays(-1)) && join.isBefore(now.plusDays(1));
+                        }).collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+                                .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                                .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+                        topNum.forEach((key, val) -> {
+                            Map<String, Object> topMap = new HashMap<>(4);
+                            topMap.put("name", memberCodeName.get(key));
+                            topMap.put("total", val);
+                            projectTop.add(topMap);
+                        });
+                    }
+                    break;
+                }
+                case "month": {
+                    LocalDate beginDate = LocalDate.of(now.getYear(), now.getMonthValue(), 1);
+                    LocalDate finalBeginDate1 = beginDate;
+                    while (beginDate.isBefore(now) || beginDate.equals(now)) {
+                        Map<String, Object> map = new HashMap<>(4);
+                        LocalDate finalBeginDate = beginDate;
+                        long count = projects == null ? 0 : projects.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate begin = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return begin.equals(finalBeginDate);
+                        }).count();
+                        map.put("日期", beginDate.getDayOfMonth() + "日");
+                        map.put("数量", count);
+                        projectList.add(map);
+                        //任务数
+                        Map<String, Object> taskMap = new HashMap<>(4);
+                        long taskCount = tasks == null ? 0 : tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return create.equals(finalBeginDate);
+                        }).count();
+                        taskMap.put("日期", beginDate.getDayOfMonth() + "日");
+                        taskMap.put("任务", taskCount);
+                        taskList.add(taskMap);
+                        beginDate = beginDate.plusDays(1);
+                    }
+                    Map<String, Long> topNum = new LinkedHashMap<>();
+                    if (projectMemberList != null) {
+                        projectMemberList.stream().filter(o -> StrUtil.isNotEmpty(o.getJoin_time())).filter(o -> {
+                            LocalDate join = LocalDateTime.parse(o.getJoin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return join.getMonthValue() == finalBeginDate1.getMonthValue() && join.getYear() == finalBeginDate1.getYear();
+                        }).collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+                                .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                                .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+                        topNum.forEach((key, val) -> {
+                            Map<String, Object> topMap = new HashMap<>(4);
+                            topMap.put("name", memberCodeName.get(key));
+                            topMap.put("total", val);
+                            projectTop.add(topMap);
+                        });
+                    }
+                    break;
+                }
+                case "year": {
+                    LocalDate beginDate = LocalDate.of(now.getYear(), 1, 1);
+                    LocalDate finalBeginDate1 = beginDate;
+                    while (beginDate.isBefore(now) || beginDate == now) {
+                        Map<String, Object> map = new HashMap<>(4);
+                        LocalDate finalBeginDate = beginDate;
+                        long count = projects == null ? 0 : projects.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate begin = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return begin.getMonthValue() == finalBeginDate.getMonthValue() && begin.getYear() == finalBeginDate.getYear();
+                        }).count();
+                        map.put("日期", beginDate.getMonthValue() + "月");
+                        map.put("数量", count);
+                        projectList.add(map);
+                        //任务数
+                        Map<String, Object> taskMap = new HashMap<>(4);
+                        long taskCount = tasks == null ? 0 : tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                            LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return create.getMonthValue() == finalBeginDate.getMonthValue() && create.getYear() == finalBeginDate.getYear();
+                        }).count();
+                        taskMap.put("日期", beginDate.getMonthValue() + "月");
+                        taskMap.put("任务", taskCount);
+                        taskList.add(taskMap);
+                        beginDate = beginDate.plusMonths(1);
+                    }
+                    Map<String, Long> topNum = new LinkedHashMap<>();
+                    if (projectMemberList != null) {
+                        projectMemberList.stream().filter(o -> StrUtil.isNotEmpty(o.getJoin_time())).filter(o -> {
+                            LocalDate join = LocalDateTime.parse(o.getJoin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                            return join.getYear() == finalBeginDate1.getYear();
+                        }).collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+                                .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                                .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+                        topNum.forEach((key, val) -> {
+                            Map<String, Object> topMap = new HashMap<>(4);
+                            topMap.put("name", memberCodeName.get(key));
+                            topMap.put("total", val);
+                            projectTop.add(topMap);
+                        });
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        } else {
+            LocalDate beginDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATE));
+            LocalDate finalDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATE));
+            finalDate = finalDate.isBefore(now) ? finalDate : now;
+            LocalDate finalBeginDate1 = beginDate;
+            LocalDate finalDate1 = finalDate;
+            while (beginDate.isBefore(finalDate) || beginDate.equals(finalDate)) {
+                Map<String, Object> map = new HashMap<>(4);
+                LocalDate finalBeginDate = beginDate;
+                long count = projects == null ? 0 : projects.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                    LocalDate begin = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                    return begin.equals(finalBeginDate);
+                }).count();
+                map.put("日期", beginDate.getMonthValue() + "-" + beginDate.getDayOfMonth());
+                map.put("数量", count);
+                projectList.add(map);
+                //任务数
+                Map<String, Object> taskMap = new HashMap<>(4);
+                long taskCount = tasks == null ? 0 : tasks.stream().filter(o -> StrUtil.isNotEmpty(o.getCreate_time())).filter(o -> {
+                    LocalDate create = LocalDateTime.parse(o.getCreate_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                    return create.equals(finalBeginDate);
+                }).count();
+                taskMap.put("日期", beginDate.getMonthValue() + "-" + beginDate.getDayOfMonth());
+                taskMap.put("任务", taskCount);
+                taskList.add(taskMap);
+                beginDate = beginDate.plusDays(1);
+            }
+            Map<String, Long> topNum = new LinkedHashMap<>();
+            if (projectMemberList != null) {
+                projectMemberList.stream().filter(o -> StrUtil.isNotEmpty(o.getJoin_time())).filter(o -> {
+                    LocalDate join = LocalDateTime.parse(o.getJoin_time(), DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME)).toLocalDate();
+                    return join.isAfter(finalBeginDate1.plusDays(-1)) && join.isBefore(finalDate1.plusDays(1));
+                }).collect(Collectors.groupingBy(ProjectMember::getMember_code, Collectors.counting()))
+                        .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                        .forEachOrdered(x -> topNum.put(x.getKey(), x.getValue()));
+                topNum.forEach((key, val) -> {
+                    Map<String, Object> topMap = new HashMap<>(4);
+                    topMap.put("name", memberCodeName.get(key));
+                    topMap.put("total", val);
+                    projectTop.add(topMap);
+                });
+            }
+        }
+        //任务排行
+        List<Task> memberTaskList = tasks == null ? null : tasks.parallelStream().filter(o -> StrUtil.isNotEmpty(o.getAssign_to())).collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(memberTaskList)) {
+            Map<String, Long> taskTopNum = new LinkedHashMap<>();
+            memberTaskList.stream().collect(Collectors.groupingBy(Task::getAssign_to, Collectors.counting()))
+                    .entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .forEachOrdered(x -> taskTopNum.put(x.getKey(), x.getValue()));
+            taskTopNum.forEach((key, val) -> {
+                Map<String, Object> map = new HashMap<>(4);
+                map.put("name", memberCodeName.get(key));
+                map.put("total", val);
+                taskTop.add(map);
+            });
+        }
+        result.put("projectList", projectList);
+        result.put("projectTop", projectTop);
+        //任务数据
+        result.put("taskList", taskList);
+        result.put("taskTop", taskTop);
+        return result;
+    }
+
+    public List<Task> taskPriority(String orgCode) {
+        List<Project> list = lambdaQuery().select(Project::getCode).eq(Project::getOrganization_code, orgCode).list();
+        List<Task> taskList = null;
+        if (list != null) {
+            List<String> codes = list.parallelStream().map(Project::getCode).collect(Collectors.toList());
+            taskList = taskService.lambdaQuery().select(Task::getCode, Task::getName, Task::getPri, Task::getEnd_time).ne(Task::getExecute_status, "closed")
+                    .eq(Task::getDeleted, 0).eq(Task::getDone, 0).in(Task::getProject_code, codes).list();
+            if (taskList != null) {
+                taskList = taskList.stream().sorted(Comparator.comparing(Task::getEnd_time, Comparator.reverseOrder())).sorted(Comparator.comparing(Task::getPri, Comparator.reverseOrder())).collect(Collectors.toList());
+            }
+        }
+        return taskList;
     }
 }

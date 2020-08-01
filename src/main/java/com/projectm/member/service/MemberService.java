@@ -1,52 +1,43 @@
 package com.projectm.member.service;
 
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.poi.excel.sax.Excel07SaxReader;
-import cn.hutool.poi.excel.sax.handler.RowHandler;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.framework.common.exception.CustomException;
-import com.framework.common.utils.StringUtils;
-import com.framework.common.utils.security.Md5Utils;
-import com.framework.security.util.UserUtil;
+import com.framework.common.utils.DateUtils;
 import com.projectm.common.CommUtils;
 import com.projectm.common.DateUtil;
-import com.projectm.common.ListUtils;
+import com.projectm.config.MProjectConfig;
 import com.projectm.member.domain.Member;
 import com.projectm.member.domain.MemberAccount;
-import com.projectm.member.domain.ProjectMember;
 import com.projectm.member.mapper.MemberAccountMapper;
 import com.projectm.member.mapper.MemberMapper;
 import com.projectm.member.mapper.ProjectMemberMapper;
-import com.projectm.org.domain.Department;
 import com.projectm.org.domain.Organization;
 import com.projectm.org.mapper.OrganizationMapper;
 import com.projectm.org.service.DepartmentMemberService;
-import com.projectm.org.service.DepartmentService;
 import com.projectm.org.service.OrganizationService;
 import com.projectm.system.service.SystemConfigService;
-import com.projectm.task.domain.Task;
-import com.projectm.task.domain.TaskMember;
 import com.projectm.task.service.TaskMemberService;
 import com.projectm.task.service.TaskService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import cn.hutool.core.collection.CollUtil;
 
 @Service
 public class MemberService extends ServiceImpl<MemberMapper, Member> {
@@ -108,7 +99,33 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
         Integer i2 = memberAccountMapper.updateById(ma);
         return i1+i2;
     }
+    @Value("${mproject.downloadServer}")
+    private String downloadServer;
 
+    @Transactional
+    public Map uploadAvatar(String memberCode,String originFileName,InputStream in){
+        Map resMap = new HashMap();
+        String uuid = CommUtils.getUUID();
+        String date = DateUtils.dateTimeNow("yyyyMMdd");
+        String file_url = MProjectConfig.getProfile()+"/member/avatar/"+memberCode+"/"+date+"/";
+        String uploadFileName = uuid+"-"+originFileName;
+        try {
+            // 这里使用Apache的FileUtils方法来进行保存
+            FileUtils.copyInputStreamToFile(in, new File(file_url, uploadFileName));
+            String base_url = "/member/avatar/"+memberCode+"/"+date+"/"+uploadFileName;
+            String downloadUrl = "/common/image?filePathName="+base_url+"&realFileName="+originFileName;
+            resMap.put("base_url", base_url);
+            resMap.put("url",downloadServer+downloadUrl);
+            resMap.put("filename", uploadFileName);
+            memberAccountService.lambdaUpdate().eq(MemberAccount::getMember_code,memberCode)
+                    .set(MemberAccount::getAvatar,downloadServer+downloadUrl).update();
+            lambdaUpdate().eq(Member::getCode,memberCode).set(Member::getAvatar,downloadServer+downloadUrl).update();
+
+        } catch (IOException e) {
+            throw new CustomException(e.getMessage());
+        }
+        return resMap;
+    }
     public Member getMemberByName(String account){
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", account);

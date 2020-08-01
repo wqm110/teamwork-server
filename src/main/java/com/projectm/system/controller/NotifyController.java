@@ -104,35 +104,19 @@ public class NotifyController   extends BaseController {
         String title = MapUtils.getString(mmap,"title");
         String date = MapUtils.getString(mmap,"date");
 
-        LambdaQueryChainWrapper lambdaQuery = notifyService.lambdaQuery()
+        LambdaQueryChainWrapper<Notify> lambdaQuery = notifyService.lambdaQuery()
         		.eq(Notify::getTo, UserUtil.getLoginUser().getUser().getCode())
                 .eq(Notify::getTerminal,"project");
         if(StringUtils.isNotEmpty(title)){
-            lambdaQuery.like("title",title);
+        	lambdaQuery.like(Notify::getTitle,title);
         }
         if(StringUtils.isNotEmpty(date)){
             String [] dates = date.split("~");
-            lambdaQuery.between("create_time",dates[0]+" 00:00:00",dates[1]+" 23:59:59");
+            lambdaQuery.between(Notify::getCreate_time,dates[0]+" 00:00:00",dates[1]+" 23:59:59");
          }
 
         page = lambdaQuery.page(page);
 
-
-        /*Map loginMember = getLoginMember();
-        Integer pageSize = MapUtils.getInteger(mmap,"pageSize",1000);
-        Integer page = MapUtils.getInteger(mmap,"page",1);
-        String type = MapUtils.getString(mmap,"type",null);
-        String title = MapUtils.getString(mmap,"title",null);
-        String date = MapUtils.getString(mmap,"date",null);
-
-        IPage<Map> ipage = new Page();
-        ipage.setSize(pageSize);
-        ipage.setCurrent(page);
-        Map params = new HashMap();
-        params.put("to",MapUtils.getString(loginMember,"memberCode",null));
-        params.put("terminal","project");
-
-        IPage<Map> resultData = notifyService.getAllOrganizationByMemberCode(ipage,params);*/
         Map data = new HashMap();
         if(null == page){
             page = new Page<>();

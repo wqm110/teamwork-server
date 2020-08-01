@@ -318,4 +318,11 @@ public class LoginController {
             return new AjaxResult(ResultCode.EMAIL_USED);
         }
     }
+    
+    @PostMapping("/project/login/_out")
+    @ResponseBody
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult logOut(String mail) {
+         return AjaxResult.success("退出成功", true);      
+    }
 }
