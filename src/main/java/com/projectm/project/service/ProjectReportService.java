@@ -18,9 +18,15 @@ import com.projectm.system.domain.Notify;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.alibaba.fastjson.JSONObject;
 import java.math.BigDecimal;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ProjectReportService extends ServiceImpl<ProjectReportMapper, ProjectReport> {
@@ -30,61 +36,33 @@ public class ProjectReportService extends ServiceImpl<ProjectReportMapper, Proje
      * 计算最近n天的数据
      * @param String $projectCode 项目code
      * @param Integer day 近n天
+     * @param projectCode 项目code
+     * @param day         近n天
      */
-    public Map getReportByDay(String projectCode,Integer day){
-        Map result  = new HashMap();
-        List<String> dateMList = new ArrayList();
-        List<Integer> taskList = new ArrayList();
-        List<Integer> undoneTaskList = new ArrayList();
-        List<Integer> baseLineList = new ArrayList();
-        Integer max = 0;
-        Date now = new Date();
-        for(int i=day;i>=1;i--){
-            Date d = DateUtil.add(now,5,day*-1);
-            String dateYMD = DateUtil.format("yyyy-MM-dd",d);
-            String dateMD = DateUtil.format("MM-dd",d);
-            dateMList.add(dateMD);
-            ProjectReport pr = getProjectReportByProjectCodeAndDate(projectCode,dateYMD);
-            //未完成
-            if(null != pr){
-                /**
-                 if ($report) {
-                     $task = get_object_vars($report['content']);
-                     $taskList[] = $task['task'];
-                     $undoneTaskList[] = $task['task:undone'];
-                     if ($task['task:undone'] > $max) {
-                        $max = $task['task:undone'];
-                     }
-                 }
-                 */
-            }else{
-                taskList.add(0);
-                undoneTaskList.add(0);
-            }
-        }
-        if(max >0){
-            BigDecimal a =new BigDecimal(max/(day-1)).setScale(1, BigDecimal.ROUND_HALF_UP);
-            Integer current = max;
-            for(int i=0;i<=day;i++){
-                if(current<0 || day == i){
-                    current =0;
-                }
-                baseLineList.add(current);
-                current -= a.intValue();
-            }
-        }
-        result.put("date",dateMList);
-        result.put("task",taskList);
-        result.put("undoneTask",undoneTaskList);
-        result.put("baseLineList",baseLineList);
-        return result;
-    }
-
-    public ProjectReport getProjectReportByProjectCodeAndDate(String projectCode,String date){
-        LambdaQueryWrapper<ProjectReport> reportWQ = new LambdaQueryWrapper<>();
-        reportWQ.eq(ProjectReport::getProject_code, projectCode);
-        reportWQ.eq(ProjectReport::getDate,date);
-        return baseMapper.selectOne(reportWQ);
+	 public Map getReportByDay(String projectCode, Integer day) {
+         Map<String, Object> result = new HashMap<>();
+         LocalDate now = LocalDate.now();
+         List<String> date = new ArrayList<>();
+         List<Integer> task = new ArrayList<>();
+         List<Integer> undoneTask = new ArrayList<>();
+         List<Integer> baseLineList = new ArrayList<>();
+         List<LocalDate> dateList = Stream.iterate(now, o -> o.plusDays(-1)).limit(day).collect(Collectors.toList());
+         List<ProjectReport> projectReports = lambdaQuery().in(ProjectReport::getDate, dateList).eq(ProjectReport::getProject_code, projectCode)
+                 .orderByAsc(ProjectReport::getDate).list();
+         if (projectReports != null) {
+             projectReports.forEach(o -> {
+                 date.add(o.getDate().substring(5));
+                 Map<String, Object> map = JSONObject.parseObject(o.getContent());
+                 task.add((int) map.get("task"));
+                 undoneTask.add((int) map.get("undoneTask"));
+                 baseLineList.add((int) map.get("baseLineList"));
+             });
+         }
+         result.put("date", date);
+         result.put("task", task);
+         result.put("undoneTask", undoneTask);
+         result.put("baseLineList", baseLineList);
+         return result;
     }
 
 

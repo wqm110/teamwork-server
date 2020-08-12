@@ -14,7 +14,7 @@ import com.projectm.task.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.projectm.web.BaseController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @version V1.0
@@ -34,7 +35,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("project")
-public class TaskFileController {
+public class TaskFileController extends BaseController{
 
     @Autowired
     private TaskService taskService;
@@ -64,10 +65,12 @@ public class TaskFileController {
     public AjaxResult downTemplate(@RequestParam("projectCode") String projectCode, @RequestParam("file") MultipartFile file) {
         List<List<Object>> listInfo = ExcelUtils.getListInfo(file);
         List<Task> taskList = new ArrayList<>();
+        Map loginMember = getLoginMember();
+        String memberCode = (String) loginMember.get("memberCode");
         if (CollUtil.isNotEmpty(listInfo)) {
             for (List<Object> obj : listInfo) {
                 Task task = Task.builder().project_code(projectCode).code(IdUtil.fastSimpleUUID())
-                        .name((String) obj.get(0)).pName((String) obj.get(1))
+                		.name(String.valueOf(obj.get(0))).pName(String.valueOf(obj.get(1)))
                         .stage_code((String) obj.get(2))
                         .assign_to((String) obj.get(3))
                         .begin_time((String) obj.get(4)).end_time((String) obj.get(5))
@@ -76,7 +79,7 @@ public class TaskFileController {
                         .task_tag((String) obj.get(8)).build();
                 taskList.add(task);
             }
-            taskService.saveTaskList(taskList, projectCode);
+            taskService.saveTaskList(memberCode, taskList, projectCode);
             return AjaxResult.success();
         } else {
             return AjaxResult.warn("文件格式错误或内容为空！");

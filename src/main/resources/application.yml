@@ -9,8 +9,8 @@ mproject:
   # 实例演示开关
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/mproject/uploadPath，Linux配置 /home/mproject/uploadPath）
-  profile: /home/mproject/uploadPath
-  #profile: D:/mproject/uploadPath
+  #profile: /home/mproject/uploadPath
+  profile: D:/mproject/uploadPath
   
   # 获取ip地址开关
   addressEnabled: true
@@ -19,8 +19,8 @@ mproject:
 
   staticUpload: /static/upload/**
 
-  #uploadFolderPath: D:/idea-workspace/mproject/static/upload/
-  uploadFolderPath: home/mproject/static/upload/
+  uploadFolderPath: D:/idea-workspace/mproject/static/upload/
+  #uploadFolderPath: home/mproject/static/upload/
 
   imgServer: http://122.112.164.217:8888/teamProject/
   #用户默认图标
@@ -94,9 +94,9 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     druid:
       #url: jdbc:mysql://139.199.229.215:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
-      url: jdbc:mysql://127.0.0.1:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
+      url: jdbc:mysql://122.112.164.217:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
       username: teamwork
-      password: 
+      password: Admin@123!
       #password: P@ssWord8.0
   #Redis
   redis:
@@ -105,7 +105,7 @@ spring:
     # 端口，默认为6379
     port: 6379
     # 密码
-    password: 
+    password: fZxm2gSUeR9VfXzZlk9GemUw2
     # 连接超时时间
     timeout: 10s
     lettuce:

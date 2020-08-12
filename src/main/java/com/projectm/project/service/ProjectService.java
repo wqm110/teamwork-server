@@ -712,7 +712,7 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
             taskList = taskService.lambdaQuery().select(Task::getCode, Task::getName, Task::getPri, Task::getEnd_time).ne(Task::getExecute_status, "closed")
                     .eq(Task::getDeleted, 0).eq(Task::getDone, 0).in(Task::getProject_code, codes).list();
             if (taskList != null) {
-                taskList = taskList.stream().sorted(Comparator.comparing(Task::getEnd_time, Comparator.reverseOrder())).sorted(Comparator.comparing(Task::getPri, Comparator.reverseOrder())).collect(Collectors.toList());
+            	taskList = taskList.stream().filter(o -> o.getPri() != null && o.getEnd_time() != null).sorted(Comparator.comparing(Task::getEnd_time, Comparator.reverseOrder())).sorted(Comparator.comparing(Task::getPri, Comparator.reverseOrder())).collect(Collectors.toList());
             }
         }
         return taskList;

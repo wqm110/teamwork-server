@@ -23,7 +23,7 @@ public class DateUtil {
 	public static final String PATTERN_DATETIME_MIN = "yyyy-MM-dd HH:mm";
 	public static final String PATTERN_MONTH = "yyyy-MM";
 	public static final String PATTERN_YEAR = "yyyy";
-
+	public static final String PATTERN_MONTH_DAY = "MM-dd";
 
 	private static final String PATTERN_FULL = "yyyy-MM-dd HH:mm:ss.SSS";
 

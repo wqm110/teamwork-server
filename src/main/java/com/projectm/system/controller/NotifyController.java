@@ -97,7 +97,7 @@ public class NotifyController   extends BaseController {
      */
     @PostMapping("/notify/index")
     @ResponseBody
-    public AjaxResult notify(@RequestParam Map<String,Object> mmap)  throws Exception
+    public AjaxResult notify(@RequestParam Map<String,Object> mmap)
     {
 
         IPage<Notify> page = Constant.createPage(new Page<Notify>(),mmap);
@@ -106,7 +106,7 @@ public class NotifyController   extends BaseController {
 
         LambdaQueryChainWrapper<Notify> lambdaQuery = notifyService.lambdaQuery()
         		.eq(Notify::getTo, UserUtil.getLoginUser().getUser().getCode())
-                .eq(Notify::getTerminal,"project");
+                .eq(Notify::getTerminal,"project").orderByDesc(Notify::getCreate_time);
         if(StringUtils.isNotEmpty(title)){
         	lambdaQuery.like(Notify::getTitle,title);
         }

@@ -2,6 +2,7 @@ package com.projectm.config;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -223,5 +224,21 @@ public class WebSocketServer {
 
     public static synchronized void subOnlineCount() {
         WebSocketServer.onlineCount--;
+    }
+    
+    public static Set<String> cleanInfo(Set<String> sessionIds) {
+        Set<String> ids = new HashSet<>();
+        for (WebSocketServer server : websocketservers) {
+            ids.add(server.session_id);
+        }
+        Set<String> newStrs = new HashSet<>();
+        if (sessionIds != null) {
+            for (String next : sessionIds) {
+                if (ids.contains(next)) {
+                    newStrs.add(next);
+                }
+            }
+        }
+        return newStrs;
     }
 }

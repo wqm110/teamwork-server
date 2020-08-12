@@ -1186,11 +1186,11 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
     private TaskTagService taskTagService;
 
     @Transactional(rollbackFor = Exception.class)
-    public void saveTaskList(List<Task> taskList, String projectCode) {
-        List<String> assNameList = taskList.parallelStream().map(Task::getAssign_to).distinct().collect(Collectors.toList());
+    public void saveTaskList(String memberCode, List<Task> taskList, String projectCode) {
+    	List<String> assNameList = taskList.parallelStream().map(Task::getAssign_to).distinct().collect(Collectors.toList());
         //用户
-        Map<String, String> memberNameCode = memberService.lambdaQuery().select(Member::getCode).in(Member::getName, assNameList).list()
-                .parallelStream().collect(Collectors.toMap(Member::getName, Member::getCode));
+    	Map<String, String> memberNameCode = memberService.lambdaQuery().select(Member::getCode, Member::getName).in(Member::getName, assNameList).list()
+    			.parallelStream().collect(Collectors.toMap(Member::getName, Member::getCode));
         //任务列表
         Map<String, String> stageNameCode = taskStageService.lambdaQuery().select(TaskStage::getName, TaskStage::getCode).eq(TaskStage::getProject_code, projectCode).list()
                 .parallelStream().collect(Collectors.toMap(TaskStage::getName, TaskStage::getCode));
@@ -1204,6 +1204,7 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
                 filter(o -> !collect.contains(o)).collect(Collectors.toList());
         //要新增的标签
         List<TaskTag> saveTaskTagList = new ArrayList<>();
+        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DateUtil.PATTERN_DATETIME));
         String[] colors = {"blue", "red", "orange", "green", "brown", "purple"};
         newTagList.forEach(o -> {
             String uuid = IdUtil.fastSimpleUUID();
@@ -1216,6 +1217,8 @@ public class TaskService   extends ServiceImpl<TaskMapper, Task> {
         //新增的标签与任务关系
         List<TaskToTag> saveTaskToTagList = new ArrayList<>();
         taskList.forEach(o -> {
+        	o.setCreate_by(memberCode);
+        	o.setCreate_time(formatDate);
             if (StrUtil.isNotEmpty(o.getPriText())) {
                 switch (o.getPriText()) {
                     case Constants.GENERAL_STR:
