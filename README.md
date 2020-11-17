@@ -18,7 +18,7 @@ MYSQL 8
 
 #### 使用说明
 
-1.演示地址：http://teamwork.mokingsoft.com
+1.演示地址：http://teamwork.mokingsoft.com【服务器升级、暂停两天服务】
 
 demo/123456
 
