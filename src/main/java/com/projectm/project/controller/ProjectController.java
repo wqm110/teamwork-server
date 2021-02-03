@@ -102,7 +102,6 @@ public class ProjectController extends BaseController {
     @Value("${mproject.downloadServer}")
     private String downloadServer;
 
-
     /**
      * 登录系统后，请求的索引
      * @param
@@ -116,7 +115,7 @@ public class ProjectController extends BaseController {
 
 
     /**
-     * 上传头像
+     * 得到自己的项目日志
      * @param
      * @return
      */
@@ -655,6 +654,32 @@ public class ProjectController extends BaseController {
         return AjaxResult.success(Constant.createPageResultMap(projectTemplateService.getProjectTemplateIndex(Constant.createPage(mmap),mmap)));
     }
 
+    
+//    /**
+//     * 上传项目模板图片
+//     * @param
+//     * @return
+//     */
+//    @PostMapping("/project_template/uploadcover")
+//    @ResponseBody
+//    public AjaxResult uploadcover(HttpServletRequest request, @RequestParam("cover") MultipartFile multipartFile)  throws Exception
+//    {
+//        Map resMap = new HashMap();
+//        String code = request.getParameter("code");
+//
+//         if (multipartFile.isEmpty()) {
+//             return  AjaxResult.warn("文件名不能为空！");
+//         } else {
+//             if(ObjectUtil.isEmpty(multipartFile)){
+//                 throw new CustomException("请选择上传图片！");
+//             }
+//             resMap = projectTemplateService.uploadcover(code,multipartFile.getOriginalFilename().toString(),multipartFile.getInputStream());
+//         }
+//         return  AjaxResult.success(resMap);
+//    }
+
+    
+    
     /**
      * 项目管理  基础设置  项目模板  项目模板删除
      * @param mmap
@@ -830,6 +855,7 @@ public class ProjectController extends BaseController {
                 .create_time(DateUtil.getCurrentDateTime())
                 .organization_code(ServletUtils.getHeaderParam("organizationCode"))
                 .code(CommUtils.getUUID())
+                .cover(MapUtils.getString(mmap,"cover"))
                 .task_board_theme("simple").build();
         return AjaxResult.success(proService.saveProject(project));
     }

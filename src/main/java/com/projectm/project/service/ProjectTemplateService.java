@@ -4,7 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.framework.common.AjaxResult;
+import com.framework.common.exception.CustomException;
+import com.framework.common.utils.DateUtils;
+import com.framework.common.utils.StringUtils;
+import com.jayway.jsonpath.internal.Utils;
+import com.projectm.common.CommUtils;
+import com.projectm.config.MProjectConfig;
 import com.projectm.mapper.CommMapper;
+import com.projectm.member.domain.Member;
+import com.projectm.member.domain.MemberAccount;
 import com.projectm.project.domain.ProjectTemplate;
 import com.projectm.project.mapper.ProjectTemplateMapper;
 import com.projectm.task.domain.TaskStagesTemplete;
@@ -12,11 +20,17 @@ import com.projectm.task.mapper.TaskStagesTempleteMapper;
 import com.projectm.task.service.TaskStagesTempleteService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +43,8 @@ public class ProjectTemplateService extends ServiceImpl<ProjectTemplateMapper, P
     CommMapper commMapper;
     @Autowired
     private TaskStagesTempleteMapper taskStagesTempleteMapper;
-
+    @Value("${mproject.downloadServer}")
+    private String downloadServer;
 
     //根据orginationCode获取模板清单
     public IPage<ProjectTemplate> getProTemplateByOrgCode(ProjectTemplate projectTemplete){
@@ -83,7 +98,10 @@ public class ProjectTemplateService extends ServiceImpl<ProjectTemplateMapper, P
     @Transactional
     public void deleteProjectTemplateAndTaskStagesTemplage(Integer ptId, List<Integer> lists){
         baseMapper.deleteById(ptId);
-        taskStagesTempleteService.removeByIds(lists);
+        if(StringUtils.isNotEmpty(lists)){
+        	taskStagesTempleteService.removeByIds(lists);
+        }
+        
     }
 
     //根据 code获取projectTemplete
@@ -91,4 +109,34 @@ public class ProjectTemplateService extends ServiceImpl<ProjectTemplateMapper, P
         return baseMapper.getProjectTemplateByCode(projectTempCode);
     }
 
+
+//    //上传项目封面图片
+//    @Transactional
+//    public Map uploadcover(String templateCode,String originFileName,InputStream in){
+//        Map resMap = new HashMap();
+//        String uuid = CommUtils.getUUID();
+//        String date = DateUtils.dateTimeNow("yyyyMMdd");
+//        String file_url = MProjectConfig.getProfile()+"/projectfile/project/cover/"+date+"/";
+//        String uploadFileName = uuid+"-"+originFileName;
+//        try {
+//            // 这里使用Apache的FileUtils方法来进行保存
+//            FileUtils.copyInputStreamToFile(in, new File(file_url, uploadFileName));
+//            String base_url = "/projectfile/project/cover/"+date+"/"+uploadFileName;
+//            String downloadUrl = "/common/image?filePathName="+base_url+"&realFileName="+originFileName;
+//            resMap.put("base_url", base_url);
+//            resMap.put("url",downloadServer+downloadUrl);
+//            resMap.put("filename", uploadFileName);
+//            if(!StringUtils.isEmpty(templateCode)){
+//            	//编辑，否则 为空
+//            	this.lambdaUpdate().eq(ProjectTemplate::getCode,templateCode)
+//                .set(ProjectTemplate::getCover,downloadServer+downloadUrl).update();
+//            }
+//            
+//
+//        } catch (IOException e) {
+//            throw new CustomException(e.getMessage());
+//        }
+//        return resMap;
+//    }
+    
 }

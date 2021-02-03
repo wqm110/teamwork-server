@@ -3,14 +3,14 @@ mproject:
   # 名称
   name: MProject
   # 版本
-  version: 1.0
+  version: 1.1
   # 版权年份
-  copyrightYear: 2020
+  copyrightYear: 2021
   # 实例演示开关
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/mproject/uploadPath，Linux配置 /home/mproject/uploadPath）
-  #profile: /home/mproject/uploadPath
-  profile: D:/mproject/uploadPath
+  profile: /home/mproject/uploadPath
+  # profile: D:/mproject/uploadPath
   
   # 获取ip地址开关
   addressEnabled: true
@@ -19,19 +19,21 @@ mproject:
 
   staticUpload: /static/upload/**
 
-  uploadFolderPath: D:/idea-workspace/mproject/static/upload/
-  #uploadFolderPath: home/mproject/static/upload/
+  #uploadFolderPath: D:/mproject/static/upload/
+  uploadFolderPath: home/mproject/static/upload/
 
   imgServer: http://122.112.164.217:8888/teamProject/
+  #imgServer: http://localhost:8888/teamProject/
+  
   #用户默认图标
   userImg: user.jpg
   #项目默认图标
   projectImg: project.png
 
 
-  #downloadServer: http://120.27.62.173:8888
   downloadServer: http://122.112.164.217:8888
-
+  #downloadServer: http://localhost:8888
+   
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为80
@@ -93,11 +95,9 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
     druid:
-      #url: jdbc:mysql://139.199.229.215:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
-      url: jdbc:mysql://122.112.164.217:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
-      username: teamwork
-      password: Admin@123!
-      #password: P@ssWord8.0
+      url: jdbc:mysql://127.0.0.1:3306/teamwork?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&tinyInt1isBit=false
+      username: user
+      password: 123!
   #Redis
   redis:
     # 地址
@@ -205,5 +205,4 @@ jwt:
 #要放行的url
 custom:
   ignored-role-path: /favicon.ico, /teamwork/login, /index/index/refreshAccessToken, /project/login/getCaptcha, /project/login/register, /project/task/_downloadTemplate, /project/task/uploadFile,
-      /project/department_member/_downloadTemplate, /project/department_member/uploadFile, /common/download, /project/index, /common/image, /imserver, /index/index/bindClientId, 
-      /project/login/_out, /project/index/systemConfig
+      /project/department_member/_downloadTemplate, /project/department_member/uploadFile, /common/download, /project/index, /common/image, /imserver, /index/index/bindClientId, /project/login/_out, /project/index/systemConfig

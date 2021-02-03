@@ -215,12 +215,14 @@ public class ProjectService extends ServiceImpl<ProjectMapper, Project>{
             taskStageMapper.insert(taskStage);
             i.set(i.get() + 1);
         });
+        //项目成员
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject_code(project.getCode());
         projectMember.setIs_owner(1);
         projectMember.setJoin_time(DateUtil.formatDateTime(new Date()));
         projectMember.setMember_code(UserUtil.getLoginUser().getUser().getCode());
         projectMemberMapper.insert(projectMember);
+        //保存项目信息
         save(project);
         projectLogService.run(new HashMap(){{
             put("member_code",projectMember.getMember_code());
