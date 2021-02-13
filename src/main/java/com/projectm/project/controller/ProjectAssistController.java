@@ -34,6 +34,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.util.*;
 
 @RestController
@@ -580,13 +583,35 @@ public class ProjectAssistController  extends BaseController {
     @Value("${mproject.downloadServer}")
     private String downloadServer;
 
+    
+    /**
+     * 每一个上传块都会包含如下分块信息：
+     * chunkNumber: 当前块的次序，第一个块是 1，注意不是从 0 开始的。
+     * totalChunks: 文件被分成块的总数。
+     * chunkSize: 分块大小，根据 totalSize 和这个值你就可以计算出总共的块数。注意最后一块的大小可能会比这个要大。
+     * currentChunkSize: 当前块的大小，实际大小。
+     * totalSize: 文件总大小。
+     * identifier: 这个就是每个文件的唯一标示。
+     * filename: 文件名。
+     * relativePath: 文件夹上传的时候文件的相对路径属性。
+     * 一个分块可以被上传多次，当然这肯定不是标准行为，但是在实际上传过程中是可能发生这种事情的，这种重传也是本库的特性之一。
+     *
+     * 根据响应码认为成功或失败的：
+     * 200 文件上传完成
+     * 201 文加快上传成功
+     * 500 第一块上传失败，取消整个文件上传
+     * 507 服务器出错自动重试该文件块上传
+     * 
+     * 此处仍不完善，未处理断点续传加密、秒传处理等。
+     */
 	@PostMapping("/file/uploadFiles")
     @ResponseBody
     public AjaxResult uploadFiels(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)  throws Exception{
         String  fileName= request.getParameter("identifier");
         String  orgFileName= request.getParameter("filename");
-        String  chunkNumber= request.getParameter("chunkNumber");
-        String  totalChunks= request.getParameter("totalChunks");
+        int  chunkNumber= request.getParameter("chunkNumber") == null ?0:new Integer(request.getParameter("chunkNumber"));
+        int  totalChunks= request.getParameter("totalChunks") == null ?0:new Integer(request.getParameter("totalChunks"));
+
         String  taskCode= request.getParameter("taskCode");
         String projectCode = request.getParameter("projectCode");
         Map loginMember = getLoginMember();
@@ -608,17 +633,66 @@ public class ProjectAssistController  extends BaseController {
             String base_url = "/projectfile/"+memberCode+"/"+date+"/"+uploadFileName;
             String downloadUrl = "/common/download?filePathName="+base_url+"&realFileName="+originFileName;
             // 这里使用Apache的FileUtils方法来进行保存
-            FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(file_url, uploadFileName));
-            com.projectm.task.domain.File file = com.projectm.task.domain.File.builder().fsize(multipartFile.getSize())
-                    .path_name(file_url+uploadFileName).file_url(downloadServer+downloadUrl).title(originFileName.substring(0,originFileName.lastIndexOf("."))).file_type("text/plain")
-                    .create_time(DateUtil.getCurrentDateTime()).code(uuid).organization_code(orgCode).project_code(projectCode).create_by(memberCode)
-                    .deleted(0).downloads(0l).task_code(taskCode).extension(originFileName.substring(originFileName.lastIndexOf(".")+1)).build();
-            Project project = fileService.uploadFiles(file,memberCode,projectCode);
-            Map result = new HashMap();
-            result.put("key",file.getPath_name());
-            result.put("url",file.getFile_url());
-            result.put("projectName",project.getName());
-            return AjaxResult.success(result);
+            //FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), new File(file_url, uploadFileName));
+            File tempFile= new File(file_url, originFileName);
+            Long fileSize = 0L;
+            //第一个块,则新建文件
+            if(1==chunkNumber && !tempFile.exists()){
+            	FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), tempFile);
+            }else{
+                //进行写文件操作
+                try(
+                        //将块文件写入文件中
+                        InputStream fos=multipartFile.getInputStream();
+                        RandomAccessFile raf =new RandomAccessFile(tempFile,"rw")
+                ) {
+                    int len=-1;
+                    byte[] buffer=new byte[1024];
+                    raf.seek((chunkNumber-1)*1024*1024);
+                    while((len=fos.read(buffer))!=-1){
+                        raf.write(buffer,0,len);
+                    }
+                    //文件大小
+                    fileSize = raf.length();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    if(chunkNumber==1) {
+                    	tempFile.delete();
+                    }
+                    throw new Exception("读写文件错误!");
+                }
+            }
+
+            
+            if(chunkNumber == totalChunks){
+                //分片读写结束
+            	//重命名，以免重复
+            	File newFile  = new File(file_url, uploadFileName);
+            	tempFile.renameTo(newFile);
+                com.projectm.task.domain.File file = com.projectm.task.domain.File.builder().fsize(fileSize)
+                        .path_name(file_url+uploadFileName)
+                        .file_url(downloadServer+downloadUrl)
+                        .title(originFileName.substring(0,originFileName.lastIndexOf(".")))
+                        .file_type("text/plain")
+                        .create_time(DateUtil.getCurrentDateTime())
+                        .code(uuid)
+                        .organization_code(orgCode)
+                        .project_code(projectCode)
+                        .create_by(memberCode)
+                        .deleted(0)
+                        .downloads(0l)
+                        .task_code(taskCode)
+                        .extension(originFileName.substring(originFileName.lastIndexOf(".")+1)).build();
+                Project project = fileService.uploadFiles(file,memberCode,projectCode);
+                Map result = new HashMap();
+                result.put("key",file.getPath_name());
+                result.put("url",file.getFile_url());
+                result.put("projectName",project.getName());
+                return AjaxResult.success(result);
+            }else {
+                //正常返回
+                return AjaxResult.success();
+            }
         }
     }
 
