@@ -29,6 +29,9 @@ demo/123456
 my.cnf位于etc文件夹下，vim下光标移到最后，添加如下：
 
 sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+3.提供数据库teamwork0309_init.sql 无相关数据 默认账号admin/123456
+
 #### 系统截图
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142642_ba78ff2a_132459.png "11.png")
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0714/142654_6a430b66_132459.png "2.png")
